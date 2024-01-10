@@ -1,5 +1,8 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
+    <button class="button transparent compact" title="Connect to Live Agent" @click="connectToLiveAgent">
+      <fluent-icon icon="open" size="22" :class="$dm('text-black-900', 'dark:text-slate-50')" />
+    </button>
     <button
       v-if="
         canLeaveConversation &&
@@ -43,7 +46,7 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { IFrameHelper, RNHelper } from 'widget/helpers/utils';
 import { popoutChatWindow } from '../helpers/popoutHelper';
 import FluentIcon from 'shared/components/FluentIcon/Index.vue';
@@ -65,9 +68,15 @@ export default {
       default: true,
     },
   },
+  data() {
+    return {
+      roomNameSuffix: '',
+    };
+  },
   computed: {
     ...mapGetters({
       conversationAttributes: 'conversationAttributes/getConversationParams',
+      currentUser: 'contacts/getCurrentUser',
     }),
     canLeaveConversation() {
       return [
@@ -93,6 +102,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions('conversation', ['sendMessage']),
     popoutWindow() {
       this.closeWindow();
       const {
@@ -116,6 +126,19 @@ export default {
     },
     resolveConversation() {
       this.$store.dispatch('conversation/resolveConversation');
+    },
+    async connectToLiveAgent() {
+      this.roomNameSuffix = `${Math.random() * 100}-${Date.now()}`;
+      const inviteLink = `https://8x8.vc/vpaas-magic-cookie-03c4083b68f94182b717b7b53c031553/${this.roomNameSuffix}`;
+      await this.sendMessage({
+        content: `Join meeting via this link ${inviteLink}`,
+      });
+      const launchUrl = `https://test1.jeeves.314ecorp.tech/live-agent/meeting.html?name=${this.currentUser.name}&email=${this.currentUser.email}&room=${this.roomNameSuffix}`;
+      const anchorElm = document.createElement('a');
+      anchorElm.href = launchUrl;
+      anchorElm.target = '_blank';
+      anchorElm.click();
+      anchorElm.remove();
     },
   },
 };
