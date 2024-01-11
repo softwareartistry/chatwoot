@@ -10,9 +10,9 @@ on:
     branches:
       - develop
       - master
+      - feat*
     tags:
       - v*
-      - feat*
   workflow_dispatch:
 
 jobs:
