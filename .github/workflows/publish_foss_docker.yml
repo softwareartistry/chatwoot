@@ -12,11 +12,12 @@ on:
       - master
     tags:
       - v*
+      - feat*
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: [self-hosted, python3.9]
+    runs-on: ubuntu-latest
     env:
       GIT_REF: ${{ github.head_ref || github.ref_name }} # ref_name to get tags/branches
     steps:
