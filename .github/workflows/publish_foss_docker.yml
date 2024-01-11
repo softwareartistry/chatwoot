@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-host, python3.9]
+    runs-on: [self-hosted, python3.9]
     env:
       GIT_REF: ${{ github.head_ref || github.ref_name }} # ref_name to get tags/branches
     steps:
