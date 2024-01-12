@@ -22,31 +22,31 @@ jobs:
       GIT_REF: ${{ github.head_ref || github.ref_name }} # ref_name to get tags/branches
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+      # - name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v1
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v1
 
-      - name: Strip enterprise code
-        run: |
-          rm -rf enterprise
-          rm -rf spec/enterprise
+      # - name: Strip enterprise code
+      #   run: |
+      #     rm -rf enterprise
+      #     rm -rf spec/enterprise
 
-      - name: Set Chatwoot edition
-        run: |
-          echo -en '\nENV CW_EDITION="ce"' >> docker/Dockerfile
+      # - name: Set Chatwoot edition
+      #   run: |
+      #     echo -en '\nENV CW_EDITION="ce"' >> docker/Dockerfile
 
-      - name: set docker tag
-        run: |
-          echo "DOCKER_TAG=registry.314ecorp.tech/chatwoot:$GIT_REF-ce" >> $GITHUB_ENV
+      # - name: set docker tag
+      #   run: |
+      #     echo "DOCKER_TAG=registry.314ecorp.tech/chatwoot:$GIT_REF-ce" >> $GITHUB_ENV
 
-      - name: replace docker tag if master
-        if: github.ref_name == 'master'
-        run: |
-          echo "DOCKER_TAG=registry.314ecorp.tech/chatwoot:latest-ce" >> $GITHUB_ENV
+      # - name: replace docker tag if master
+      #   if: github.ref_name == 'master'
+      #   run: |
+      #     echo "DOCKER_TAG=registry.314ecorp.tech/chatwoot:latest-ce" >> $GITHUB_ENV
 
       - name: Build the Docker image
         if: github.ref_name != 'development'
