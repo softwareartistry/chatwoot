@@ -17,7 +17,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, python3.9]
+    runs-on: [self-hosted, docker]
     env:
       GIT_REF: ${{ github.head_ref || github.ref_name }} # ref_name to get tags/branches
     steps:
@@ -50,7 +50,7 @@ jobs:
 
       - name: Build the Docker image
         if: github.ref_name != 'development'
-        run: docker build . --file docker/Dockerfile --tag registry.314ecorp.tech/chatwoot:${{ github.ref_name }}
+        run: docker build . --file docker/Dockerfile --tag registry.314ecorp.tech/chatwoot:${{ github.ref_name }} --platform linux/amd64
 
       - name: Push the Docker image
         run: |
