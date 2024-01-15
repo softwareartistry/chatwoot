@@ -137,7 +137,9 @@ export default {
     },
     async connectToLiveAgent() {
       this.roomNameSuffix = `${Math.random() * 100}-${Date.now()}`;
-      const env = document.location.origin.split('.').pop() || 'com';
+      const env = document.location.origin.match(/\.(com|tech)$/)
+        ? document.location.origin.split('.').pop()
+        : 'tech';
       window.parent.postMessage(
         `jeeves-chatwoot-widget:${JSON.stringify({
           key: 'jeeves-launch-meeting',
@@ -145,7 +147,7 @@ export default {
         })}`,
         '*'
       );
-      const inviteLink = `https://okjeeves.${env}/meet?invite=${this.roomNameSuffix}`;
+      const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
       await this.sendMessage({
         content: `Join meeting via this link ${inviteLink}`,
       });
