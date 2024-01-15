@@ -1,7 +1,15 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
-    <button class="button transparent compact" title="Connect to Live Agent" @click="connectToLiveAgent">
-      <fluent-icon icon="open" size="22" :class="$dm('text-black-900', 'dark:text-slate-50')" />
+    <button
+      class="button transparent compact"
+      title="Connect to Live Agent"
+      @click="connectToLiveAgent"
+    >
+      <fluent-icon
+        icon="open"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
     </button>
     <button
       v-if="
@@ -129,16 +137,18 @@ export default {
     },
     async connectToLiveAgent() {
       this.roomNameSuffix = `${Math.random() * 100}-${Date.now()}`;
-      const inviteLink = `https://8x8.vc/vpaas-magic-cookie-03c4083b68f94182b717b7b53c031553/${this.roomNameSuffix}`;
+      const env = document.location.origin.split('.').pop() || 'com';
+      window.parent.postMessage(
+        `jeeves-chatwoot-widget:${JSON.stringify({
+          key: 'jeeves-launch-meeting',
+          room: this.roomNameSuffix,
+        })}`,
+        '*'
+      );
+      const inviteLink = `https://okjeeves.${env}/meet?invite=${this.roomNameSuffix}`;
       await this.sendMessage({
         content: `Join meeting via this link ${inviteLink}`,
       });
-      const launchUrl = `https://test1.jeeves.314ecorp.tech/live-agent/meeting.html?name=${this.currentUser.name}&email=${this.currentUser.email}&room=${this.roomNameSuffix}`;
-      const anchorElm = document.createElement('a');
-      anchorElm.href = launchUrl;
-      anchorElm.target = '_blank';
-      anchorElm.click();
-      anchorElm.remove();
     },
   },
 };
