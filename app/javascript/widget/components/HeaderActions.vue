@@ -1,12 +1,18 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
     <button
+      v-if="
+        canLeaveConversation &&
+        hasEndConversationEnabled &&
+        showEndConversationButton
+      "
       class="button transparent compact"
       title="Connect to Live Agent"
       @click="connectToLiveAgent"
     >
       <fluent-icon
         icon="calendar-person"
+        type="outline"
         size="22"
         :class="$dm('text-black-900', 'dark:text-slate-50')"
       />
