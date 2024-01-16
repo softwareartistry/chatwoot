@@ -18,6 +18,7 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     return;
   }
 
+  const onToggle = window.chatwootOnToggle || null;
   const chatwootSettings = window.chatwootSettings || {};
   let locale = chatwootSettings.locale;
   let baseDomain = chatwootSettings.baseDomain;
@@ -43,6 +44,7 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     resetTriggered: false,
     darkMode: getDarkMode(chatwootSettings.darkMode),
     IFrameHelper: IFrameHelper,
+    onToggle,
     setJeevesInfo(jeevesInfo) {
       IFrameHelper.sendMessage('set-jeeves-info', {
         token: jeevesInfo.token,
@@ -51,6 +53,9 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     },
     toggle(state) {
       IFrameHelper.events.toggleBubble(state);
+      if (window.$chatwoot.onToggle) {
+        window.$chatwoot.onToggle(state);
+      }
     },
 
     toggleBubbleVisibility(visibility) {

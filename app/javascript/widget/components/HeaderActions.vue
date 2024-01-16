@@ -147,11 +147,10 @@ export default {
         const response = await axios({
           method: 'post',
           url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.tech/api/v1/cacheValue`,
-          headers: { Authorization: `Bearer ${this.jeevesInfo.token}` },
+          headers: { Authorization: `${this.jeevesInfo.token}` },
           data: {
             name: this.currentUser.name,
             email: this.currentUser.email,
-            token: `${this.jeevesInfo.token}`,
           },
         });
         const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
