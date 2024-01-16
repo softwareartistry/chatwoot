@@ -6,7 +6,7 @@
       @click="connectToLiveAgent"
     >
       <fluent-icon
-        icon="open"
+        icon="calendar-person"
         size="22"
         :class="$dm('text-black-900', 'dark:text-slate-50')"
       />
