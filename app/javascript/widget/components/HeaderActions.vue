@@ -55,6 +55,7 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import axios from 'axios';
 import { IFrameHelper, RNHelper } from 'widget/helpers/utils';
 import { popoutChatWindow } from '../helpers/popoutHelper';
 import FluentIcon from 'shared/components/FluentIcon/Index.vue';
@@ -85,6 +86,7 @@ export default {
     ...mapGetters({
       conversationAttributes: 'conversationAttributes/getConversationParams',
       currentUser: 'contacts/getCurrentUser',
+      jeevesInfo: 'appConfig/getJeevesInfo',
     }),
     canLeaveConversation() {
       return [
@@ -140,17 +142,32 @@ export default {
       const env = document.location.origin.match(/\.(com|tech)$/)
         ? document.location.origin.split('.').pop()
         : 'tech';
-      window.parent.postMessage(
-        `jeeves-chatwoot-widget:${JSON.stringify({
-          key: 'jeeves-launch-meeting',
-          room: this.roomNameSuffix,
-        })}`,
-        '*'
-      );
-      const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
-      await this.sendMessage({
-        content: `Join meeting via this link ${inviteLink}`,
-      });
+
+      try {
+        const response = await axios({
+          method: 'post',
+          url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.tech/api/v1/cacheValue`,
+          headers: { Authorization: `Bearer ${this.jeevesInfo.token}` },
+          data: {
+            name: this.currentUser.name,
+            email: this.currentUser.email,
+            token: `${this.jeevesInfo.token}`,
+          },
+        });
+        const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
+        await this.sendMessage({
+          content: `Join meeting via this link ${inviteLink}`,
+        });
+
+        const launchUrl = `https://okjeeves.${env}/meeting.html?room=${this.roomNameSuffix}&key=${response.data}&tenant=${this.jeevesInfo.tenant}`;
+        const anchorElm = document.createElement('a');
+        anchorElm.href = launchUrl;
+        anchorElm.target = '_blank';
+        anchorElm.click();
+        anchorElm.remove();
+      } catch (e) {
+        // console.log(e);
+      }
     },
   },
 };

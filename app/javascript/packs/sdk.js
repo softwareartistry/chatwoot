@@ -42,7 +42,13 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     widgetStyle: getWidgetStyle(chatwootSettings.widgetStyle) || 'standard',
     resetTriggered: false,
     darkMode: getDarkMode(chatwootSettings.darkMode),
-
+    IFrameHelper: IFrameHelper,
+    setJeevesInfo(jeevesInfo) {
+      IFrameHelper.sendMessage('set-jeeves-info', {
+        token: jeevesInfo.token,
+        tenant: jeevesInfo.tenant,
+      });
+    },
     toggle(state) {
       IFrameHelper.events.toggleBubble(state);
     },

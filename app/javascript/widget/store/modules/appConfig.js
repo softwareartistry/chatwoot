@@ -5,6 +5,7 @@ import {
   SET_WIDGET_APP_CONFIG,
   SET_WIDGET_COLOR,
   TOGGLE_WIDGET_OPEN,
+  SET_JEEVES_INFO,
 } from '../types';
 
 const state = {
@@ -29,6 +30,7 @@ export const getters = {
   getReferrerHost: $state => $state.referrerHost,
   isWidgetStyleFlat: $state => $state.widgetStyle === 'flat',
   darkMode: $state => $state.darkMode,
+  getJeevesInfo: $state => $state.jeevesInfo,
 };
 
 export const actions = {
@@ -65,6 +67,9 @@ export const actions = {
   setBubbleVisibility({ commit }, hideMessageBubble) {
     commit(SET_BUBBLE_VISIBILITY, hideMessageBubble);
   },
+  setJeevesInfo({ commit }, jeevesInfo) {
+    commit(SET_JEEVES_INFO, { jeevesInfo });
+  },
 };
 
 export const mutations = {
@@ -90,6 +95,9 @@ export const mutations = {
   },
   [SET_COLOR_SCHEME]($state, darkMode) {
     $state.darkMode = darkMode;
+  },
+  [SET_JEEVES_INFO]($state, { jeevesInfo }) {
+    $state.jeevesInfo = jeevesInfo;
   },
 };
 
