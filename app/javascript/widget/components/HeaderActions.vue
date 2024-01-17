@@ -162,7 +162,7 @@ export default {
 
         const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
         await this.sendMessage({
-          content: `Join meeting via this [link](${inviteLink})`,
+          content: `Call initiated. Join using: ${inviteLink}`,
         });
 
         const launchUrl = `https://okjeeves.${env}/meeting.html?room=${this.roomNameSuffix}&key=${response.data}&tenant=${this.jeevesInfo.tenant}`;
