@@ -7,8 +7,8 @@
         showEndConversationButton
       "
       class="button transparent compact"
-      title="Connect to Live Agent"
-      @click="connectToLiveAgent"
+      title="Start meeting"
+      @click="initiateMeeting"
     >
       <fluent-icon
         icon="calendar-person"
@@ -143,7 +143,7 @@ export default {
     resolveConversation() {
       this.$store.dispatch('conversation/resolveConversation');
     },
-    async connectToLiveAgent() {
+    async initiateMeeting() {
       this.roomNameSuffix = `${Math.random() * 100}-${Date.now()}`;
       const env = document.location.origin.match(/\.(com|tech)$/)
         ? document.location.origin.split('.').pop()
@@ -159,9 +159,10 @@ export default {
             email: this.currentUser.email,
           },
         });
+
         const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
         await this.sendMessage({
-          content: `Join meeting via this link ${inviteLink}`,
+          content: `Join meeting via this [link](${inviteLink})`,
         });
 
         const launchUrl = `https://okjeeves.${env}/meeting.html?room=${this.roomNameSuffix}&key=${response.data}&tenant=${this.jeevesInfo.tenant}`;
