@@ -1,6 +1,18 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
     <button
+      class="button transparent compact"
+      title="Connect to Live Agent"
+      @click="connectToLiveAgent"
+    >
+      <fluent-icon
+        icon="chart-person"
+        type="outline"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+    <button
       v-if="
         canLeaveConversation &&
         hasEndConversationEnabled &&
@@ -11,7 +23,7 @@
       @click="initiateMeeting"
     >
       <fluent-icon
-        icon="calendar-person"
+        icon="chat-video"
         type="outline"
         size="22"
         :class="$dm('text-black-900', 'dark:text-slate-50')"
@@ -174,6 +186,11 @@ export default {
       } catch (e) {
         // console.log(e);
       }
+    },
+    async connectToLiveAgent() {
+      await this.sendMessage({
+        content: 'connect to human agent',
+      });
     },
   },
 };
