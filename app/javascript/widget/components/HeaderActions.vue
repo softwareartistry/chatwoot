@@ -19,6 +19,7 @@
         showEndConversationButton
       "
       class="button transparent compact"
+      disabled="isOnline"
       title="Start meeting"
       @click="initiateMeeting"
     >
@@ -105,6 +106,8 @@ export default {
       conversationAttributes: 'conversationAttributes/getConversationParams',
       currentUser: 'contacts/getCurrentUser',
       jeevesInfo: 'appConfig/getJeevesInfo',
+      allMessages: 'conversation/getConversation',
+      availableAgents: 'agent/availableAgents',
     }),
     canLeaveConversation() {
       return [
@@ -127,6 +130,26 @@ export default {
     },
     hasWidgetOptions() {
       return this.showPopoutButton || this.conversationStatus === 'open';
+    },
+    isOnline() {
+      const agentReplies = this.allMessages.filter(
+        message =>
+          message?.message_type === 1 && message?.sender?.type === 'user'
+      );
+      const lastAgentMessage = agentReplies[agentReplies.length - 1];
+      const agentId = lastAgentMessage?.sender?.id;
+      if (lastAgentMessage && agentId) {
+        const agent = this.availableAgents.find(
+          availableAgent => availableAgent.id === agentId
+        );
+        if (agent) {
+          return true;
+        }
+        return false;
+      }
+
+      // return this.availableAgents.length > 0;
+      return false;
     },
   },
   methods: {
@@ -189,7 +212,7 @@ export default {
     },
     async connectToLiveAgent() {
       await this.sendMessage({
-        content: 'connect to human agent',
+        content: 'Connect me to a Live Agent',
       });
     },
   },
