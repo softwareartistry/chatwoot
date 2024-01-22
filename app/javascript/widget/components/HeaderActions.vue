@@ -19,7 +19,7 @@
         showEndConversationButton
       "
       class="button transparent compact"
-      disabled="isOnline"
+      :disabled="!isOnline"
       title="Start meeting"
       @click="initiateMeeting"
     >
@@ -132,24 +132,24 @@ export default {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
     isOnline() {
-      const agentReplies = this.allMessages.filter(
-        message =>
-          message?.message_type === 1 && message?.sender?.type === 'user'
-      );
-      const lastAgentMessage = agentReplies[agentReplies.length - 1];
-      const agentId = lastAgentMessage?.sender?.id;
-      if (lastAgentMessage && agentId) {
-        const agent = this.availableAgents.find(
-          availableAgent => availableAgent.id === agentId
+      if (this.allMessages.length) {
+        const agentReplies = this.allMessages?.filter(
+          message =>
+            message?.message_type === 1 && message?.sender?.type === 'user'
         );
-        if (agent) {
-          return true;
+        const lastAgentMessage = agentReplies[agentReplies.length - 1];
+        const agentId = lastAgentMessage?.sender?.id;
+        if (lastAgentMessage && agentId) {
+          const agent = this.availableAgents.find(
+            availableAgent => availableAgent.id === agentId
+          );
+          if (agent) {
+            return true;
+          }
         }
-        return false;
       }
 
-      // return this.availableAgents.length > 0;
-      return false;
+      return this.availableAgents.length > 0;
     },
   },
   methods: {
