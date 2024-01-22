@@ -132,11 +132,11 @@ export default {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
     isOnline() {
-      const agentReplies = this.allMessages?.filter(
-        message =>
-          message?.message_type === 1 && message?.sender?.type === 'user'
-      );
-      if (agentReplies) {
+      if (this.allMessages.length) {
+        const agentReplies = this.allMessages?.filter(
+          message =>
+            message?.message_type === 1 && message?.sender?.type === 'user'
+        );
         const lastAgentMessage = agentReplies[agentReplies.length - 1];
         const agentId = lastAgentMessage?.sender?.id;
         if (lastAgentMessage && agentId) {
@@ -146,9 +146,9 @@ export default {
           if (agent) {
             return true;
           }
-          return false;
         }
       }
+
       return this.availableAgents.length > 0;
     },
   },
