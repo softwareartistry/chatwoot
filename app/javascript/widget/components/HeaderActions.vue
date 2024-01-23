@@ -132,12 +132,13 @@ export default {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
     isOnline() {
-      if (this.allMessages.length) {
+      const allMessages = Object.values(this.allMessages);
+      if (this.availableAgents.length && allMessages.length) {
         const receivedMessages = this.allMessages?.filter(
           message => message.message_type === 1
         );
         if (receivedMessages?.length) {
-          const lastMessage = receivedMessages[receivedMessages.length - 1];
+          const lastMessage = Object.values(allMessages).pop();
           if (
             !lastMessage ||
             (lastMessage && lastMessage?.sender?.type !== 'user')
