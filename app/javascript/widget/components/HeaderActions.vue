@@ -134,7 +134,7 @@ export default {
     isOnline() {
       const allMessages = Object.values(this.allMessages);
       if (this.availableAgents.length && allMessages.length) {
-        const receivedMessages = this.allMessages?.filter(
+        const receivedMessages = allMessages?.filter(
           message => message.message_type === 1
         );
         if (receivedMessages?.length) {
