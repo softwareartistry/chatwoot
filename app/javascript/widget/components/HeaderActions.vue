@@ -133,23 +133,31 @@ export default {
     },
     isOnline() {
       if (this.allMessages.length) {
-        const agentReplies = this.allMessages?.filter(
-          message =>
-            message?.message_type === 1 && message?.sender?.type === 'user'
+        const receivedMessages = this.allMessages?.filter(
+          message => message.message_type === 1
         );
-        const lastAgentMessage = agentReplies[agentReplies.length - 1];
-        const agentId = lastAgentMessage?.sender?.id;
-        if (lastAgentMessage && agentId) {
-          const agent = this.availableAgents.find(
-            availableAgent => availableAgent.id === agentId
-          );
-          if (agent) {
-            return true;
+        if (receivedMessages?.length) {
+          const lastMessage = receivedMessages[receivedMessages.length - 1];
+          if (
+            !lastMessage ||
+            (lastMessage && lastMessage?.sender?.type !== 'user')
+          ) {
+            return false;
+          }
+
+          const agentId = lastMessage?.sender?.id;
+          if (lastMessage && agentId) {
+            const agent = this.availableAgents.find(
+              availableAgent => availableAgent.id === agentId
+            );
+            if (agent) {
+              return true;
+            }
           }
         }
       }
 
-      return this.availableAgents.length > 0;
+      return false;
     },
   },
   methods: {
