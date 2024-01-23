@@ -138,7 +138,7 @@ export default {
           message => message.message_type === 1
         );
         if (receivedMessages?.length) {
-          const lastMessage = Object.values(allMessages).pop();
+          const lastMessage = receivedMessages[receivedMessages.length - 1];
           if (
             !lastMessage ||
             (lastMessage && lastMessage?.sender?.type !== 'user')
