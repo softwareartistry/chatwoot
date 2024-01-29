@@ -135,7 +135,7 @@ export default {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
     hideReplyBox() {
-      const { allowMessagesAfterResolved } = this.channelConfig;
+      const { allowMessagesAfterResolved } = window.chatwootWebChannel;
       const { status } = this.conversationAttributes;
       return !allowMessagesAfterResolved && status === 'resolved';
     },
