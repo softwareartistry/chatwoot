@@ -1,6 +1,7 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
     <button
+      v-if="!hideReplyBox"
       class="button transparent compact"
       title="Connect to Live Agent"
       :disabled="!canConnectToLiveAgent"
@@ -109,6 +110,7 @@ export default {
       jeevesInfo: 'appConfig/getJeevesInfo',
       allMessages: 'conversation/getConversation',
       availableAgents: 'agent/availableAgents',
+      channelConfig: 'appConfig/getChannelConfig',
     }),
     canLeaveConversation() {
       return [
@@ -131,6 +133,11 @@ export default {
     },
     hasWidgetOptions() {
       return this.showPopoutButton || this.conversationStatus === 'open';
+    },
+    hideReplyBox() {
+      const { allowMessagesAfterResolved } = this.channelConfig;
+      const { status } = this.conversationAttributes;
+      return !allowMessagesAfterResolved && status === 'resolved';
     },
     canConnectToLiveAgent() {
       const allMessages = Object.values(this.allMessages);
