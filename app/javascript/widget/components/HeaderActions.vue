@@ -3,6 +3,7 @@
     <button
       class="button transparent compact"
       title="Connect to Live Agent"
+      :disabled="!canConnectToLiveAgent"
       @click="connectToLiveAgent"
     >
       <fluent-icon
@@ -130,6 +131,10 @@ export default {
     },
     hasWidgetOptions() {
       return this.showPopoutButton || this.conversationStatus === 'open';
+    },
+    canConnectToLiveAgent() {
+      const allMessages = Object.values(this.allMessages);
+      return allMessages.length > 0;
     },
     isOnline() {
       const allMessages = Object.values(this.allMessages);
