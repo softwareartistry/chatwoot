@@ -110,7 +110,6 @@ export default {
       jeevesInfo: 'appConfig/getJeevesInfo',
       allMessages: 'conversation/getConversation',
       availableAgents: 'agent/availableAgents',
-      channelConfig: 'appConfig/getChannelConfig',
     }),
     canLeaveConversation() {
       return [
@@ -135,7 +134,7 @@ export default {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
     hideReplyBox() {
-      const { allowMessagesAfterResolved } = this.channelConfig;
+      const { allowMessagesAfterResolved } = window.chatwootWebChannel;
       const { status } = this.conversationAttributes;
       return !allowMessagesAfterResolved && status === 'resolved';
     },
