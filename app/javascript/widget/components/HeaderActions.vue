@@ -110,7 +110,6 @@ export default {
       jeevesInfo: 'appConfig/getJeevesInfo',
       allMessages: 'conversation/getConversation',
       availableAgents: 'agent/availableAgents',
-      channelConfig: 'appConfig/getChannelConfig',
     }),
     canLeaveConversation() {
       return [
