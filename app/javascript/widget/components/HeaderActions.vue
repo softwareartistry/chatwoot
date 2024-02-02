@@ -207,7 +207,7 @@ export default {
       try {
         const response = await axios({
           method: 'post',
-          url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.tech/api/v1/cacheValue`,
+          url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/cacheValue`,
           headers: { Authorization: `${this.jeevesInfo.token}` },
           data: {
             name: this.currentUser.name,
