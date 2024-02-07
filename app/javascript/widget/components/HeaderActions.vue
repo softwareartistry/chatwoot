@@ -1,7 +1,7 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
     <button
-      v-if="!hideReplyBox && canConnectToLiveAgent"
+      v-if="hasLiveAgentEnabled && !hideReplyBox && canConnectToLiveAgent"
       class="button transparent compact"
       title="Connect to Live Agent"
       :disabled="!canConnectToLiveAgent"
@@ -16,6 +16,7 @@
     </button>
     <button
       v-if="
+        hasLiveAgentEnabled &&
         canLeaveConversation &&
         hasEndConversationEnabled &&
         showEndConversationButton
@@ -140,7 +141,10 @@ export default {
     },
     canConnectToLiveAgent() {
       const allMessages = Object.values(this.allMessages);
-      return allMessages.length > 0;
+      return this.jeevesInfo?.hasLiveAgentEnabled && allMessages.length > 0;
+    },
+    hasLiveAgentEnabled() {
+      return this.jeevesInfo?.hasLiveAgentEnabled;
     },
     isOnline() {
       const allMessages = Object.values(this.allMessages);
