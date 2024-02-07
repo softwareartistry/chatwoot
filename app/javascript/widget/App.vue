@@ -328,10 +328,7 @@ export default {
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
         } else if (message.event === 'set-jeeves-info') {
-          this.$store.dispatch('appConfig/setJeevesInfo', {
-            token: message.token,
-            tenant: message.tenant,
-          });
+          this.$store.dispatch('appConfig/setJeevesInfo', message);
         }
       });
     },

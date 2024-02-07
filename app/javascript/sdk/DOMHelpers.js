@@ -16,7 +16,11 @@ export const toggleClass = (elm, classes) => {
 };
 
 export const removeClasses = (elm, classes) => {
-  elm.classList.remove(...classes.split(' '));
+  try {
+    elm.classList.remove(...classes.split(' '));
+  } catch (e) {
+    // console.error(e);
+  }
 };
 
 export const onLocationChange = ({ referrerURL, referrerHost }) => {
