@@ -141,7 +141,7 @@ export default {
     },
     canConnectToLiveAgent() {
       const allMessages = Object.values(this.allMessages);
-      return this.jeevesInfo?.hasLiveAgentEnabled && allMessages.length > 0;
+      return allMessages.length > 0;
     },
     hasLiveAgentEnabled() {
       return this.jeevesInfo?.hasLiveAgentEnabled;
