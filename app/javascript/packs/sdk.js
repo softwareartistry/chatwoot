@@ -46,10 +46,7 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     IFrameHelper: IFrameHelper,
     onToggle,
     setJeevesInfo(jeevesInfo) {
-      IFrameHelper.sendMessage('set-jeeves-info', {
-        token: jeevesInfo.token,
-        tenant: jeevesInfo.tenant,
-      });
+      IFrameHelper.sendMessage('set-jeeves-info', jeevesInfo);
     },
     toggle(state) {
       IFrameHelper.events.toggleBubble(state);
