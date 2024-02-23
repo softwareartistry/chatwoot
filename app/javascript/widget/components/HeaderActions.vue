@@ -1,6 +1,39 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
     <button
+      v-if="hasLiveAgentEnabled && !hideReplyBox && canConnectToLiveAgent"
+      class="button transparent compact"
+      title="Connect to Live Agent"
+      :disabled="!canConnectToLiveAgent"
+      @click="connectToLiveAgent"
+    >
+      <fluent-icon
+        icon="chart-person"
+        type="outline"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+    <button
+      v-if="
+        hasLiveAgentEnabled &&
+        canLeaveConversation &&
+        hasEndConversationEnabled &&
+        showEndConversationButton
+      "
+      class="button transparent compact"
+      :disabled="!isOnline"
+      title="Start meeting"
+      @click="initiateMeeting"
+    >
+      <fluent-icon
+        icon="chat-video"
+        type="outline"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+    <button
       v-if="
         canLeaveConversation &&
         hasEndConversationEnabled &&
@@ -43,7 +76,8 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
+import axios from 'axios';
 import { IFrameHelper, RNHelper } from 'widget/helpers/utils';
 import { popoutChatWindow } from '../helpers/popoutHelper';
 import FluentIcon from 'shared/components/FluentIcon/Index.vue';
@@ -65,9 +99,18 @@ export default {
       default: true,
     },
   },
+  data() {
+    return {
+      roomNameSuffix: '',
+    };
+  },
   computed: {
     ...mapGetters({
       conversationAttributes: 'conversationAttributes/getConversationParams',
+      currentUser: 'contacts/getCurrentUser',
+      jeevesInfo: 'appConfig/getJeevesInfo',
+      allMessages: 'conversation/getConversation',
+      availableAgents: 'agent/availableAgents',
     }),
     canLeaveConversation() {
       return [
@@ -91,8 +134,50 @@ export default {
     hasWidgetOptions() {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
+    hideReplyBox() {
+      const { allowMessagesAfterResolved } = window.chatwootWebChannel;
+      const { status } = this.conversationAttributes;
+      return !allowMessagesAfterResolved && status === 'resolved';
+    },
+    canConnectToLiveAgent() {
+      const allMessages = Object.values(this.allMessages);
+      return allMessages.length > 0;
+    },
+    hasLiveAgentEnabled() {
+      return this.jeevesInfo?.hasLiveAgentEnabled;
+    },
+    isOnline() {
+      const allMessages = Object.values(this.allMessages);
+      if (this.availableAgents.length && allMessages.length) {
+        const receivedMessages = allMessages?.filter(
+          message => message.message_type === 1
+        );
+        if (receivedMessages?.length) {
+          const lastMessage = receivedMessages[receivedMessages.length - 1];
+          if (
+            !lastMessage ||
+            (lastMessage && lastMessage?.sender?.type !== 'user')
+          ) {
+            return false;
+          }
+
+          const agentId = lastMessage?.sender?.id;
+          if (lastMessage && agentId) {
+            const agent = this.availableAgents.find(
+              availableAgent => availableAgent.id === agentId
+            );
+            if (agent) {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    },
   },
   methods: {
+    ...mapActions('conversation', ['sendMessage']),
     popoutWindow() {
       this.closeWindow();
       const {
@@ -116,6 +201,43 @@ export default {
     },
     resolveConversation() {
       this.$store.dispatch('conversation/resolveConversation');
+    },
+    async initiateMeeting() {
+      this.roomNameSuffix = `${Math.random() * 100}-${Date.now()}`;
+      const env = document.location.origin.match(/\.(com|tech)$/)
+        ? document.location.origin.split('.').pop()
+        : 'tech';
+
+      try {
+        const response = await axios({
+          method: 'post',
+          url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/cacheValue`,
+          headers: { Authorization: `${this.jeevesInfo.token}` },
+          data: {
+            name: this.currentUser.name,
+            email: this.currentUser.email,
+          },
+        });
+
+        const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
+        await this.sendMessage({
+          content: `Call initiated. Join using: ${inviteLink}`,
+        });
+
+        const launchUrl = `https://okjeeves.${env}/meeting.html?room=${this.roomNameSuffix}&key=${response.data}&tenant=${this.jeevesInfo.tenant}`;
+        const anchorElm = document.createElement('a');
+        anchorElm.href = launchUrl;
+        anchorElm.target = '_blank';
+        anchorElm.click();
+        anchorElm.remove();
+      } catch (e) {
+        // console.log(e);
+      }
+    },
+    async connectToLiveAgent() {
+      await this.sendMessage({
+        content: 'Connect me to a Live Agent',
+      });
     },
   },
 };

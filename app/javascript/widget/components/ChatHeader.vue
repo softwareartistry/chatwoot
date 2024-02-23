@@ -4,7 +4,7 @@
     :class="$dm('bg-white', 'dark:bg-slate-900')"
   >
     <div class="flex items-center">
-      <button
+      <!-- <button
         v-if="showBackButton"
         class="-ml-3 px-2"
         @click="onBackButtonClick"
@@ -14,7 +14,7 @@
           size="24"
           :class="$dm('text-black-900', 'dark:text-slate-50')"
         />
-      </button>
+      </button> -->
       <img
         v-if="avatarUrl"
         class="h-8 w-8 rounded-full mr-3"
@@ -49,7 +49,7 @@ import { mapGetters } from 'vuex';
 
 import availabilityMixin from 'widget/mixins/availability';
 import nextAvailabilityTime from 'widget/mixins/nextAvailabilityTime';
-import FluentIcon from 'shared/components/FluentIcon/Index.vue';
+// import FluentIcon from 'shared/components/FluentIcon/Index.vue';
 import HeaderActions from './HeaderActions.vue';
 import routerMixin from 'widget/mixins/routerMixin';
 import darkMixin from 'widget/mixins/darkModeMixin.js';
@@ -57,7 +57,7 @@ import darkMixin from 'widget/mixins/darkModeMixin.js';
 export default {
   name: 'ChatHeader',
   components: {
-    FluentIcon,
+    // FluentIcon,
     HeaderActions,
   },
   mixins: [nextAvailabilityTime, availabilityMixin, routerMixin, darkMixin],
