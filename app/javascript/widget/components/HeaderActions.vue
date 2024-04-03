@@ -84,6 +84,7 @@ import FluentIcon from 'shared/components/FluentIcon/Index.vue';
 import darkModeMixin from 'widget/mixins/darkModeMixin';
 import configMixin from 'widget/mixins/configMixin';
 import { CONVERSATION_STATUS } from 'shared/constants/messages';
+import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 
 export default {
   name: 'HeaderActions',
@@ -209,10 +210,11 @@ export default {
         : 'tech';
 
       try {
+        const token = await tokenHelperInstance.getToken();
         const response = await axios({
           method: 'post',
           url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/cacheValue`,
-          headers: { Authorization: `${this.jeevesInfo.token}` },
+          headers: { Authorization: `Bearer ${token}` },
           data: {
             name: this.currentUser.name,
             email: this.currentUser.email,
