@@ -1,6 +1,7 @@
 <template>
   <div v-if="showHeaderActions" class="actions flex items-center">
     <button
+      v-if="hasLiveAgentEnabled"
       class="button transparent compact"
       title="Connect to Live Agent"
       :disabled="!canConnectToLiveAgent"
