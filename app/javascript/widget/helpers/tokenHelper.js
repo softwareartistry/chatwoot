@@ -19,7 +19,7 @@ class TokenHelper {
 
   env = '';
 
-  acessToken = '';
+  accessToken = '';
 
   refreshToken = '';
 
@@ -122,14 +122,25 @@ class TokenHelper {
   }
 
   init(message) {
-    const { accessToken, refreshToken, idToken, localTime, tenant, env } =
-      message;
+    const {
+      accessToken,
+      refreshToken,
+      idToken,
+      localTime,
+      tenant,
+      env,
+      hasLiveAgentEnabled,
+    } = message;
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.idToken = idToken;
     this.tenant = tenant;
     this.env = env;
+    this.hasLiveAgentEnabled = hasLiveAgentEnabled;
 
+    // ignore
+    // eslint-disable-next-line no-console
+    console.log({ hasLiveAgentEnabled });
     try {
       const parsed = JSON.parse(window.atob(accessToken.split('.')[1]));
       this.tokenParsed = parsed;
