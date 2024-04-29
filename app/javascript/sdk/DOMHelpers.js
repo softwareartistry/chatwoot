@@ -8,15 +8,21 @@ export const loadCSS = () => {
 };
 
 export const addClasses = (elm, classes) => {
-  elm.classList.add(...classes.split(' '));
+  if (elm) {
+    elm.classList.add(...classes.split(' '));
+  }
 };
 
 export const toggleClass = (elm, classes) => {
-  elm.classList.toggle(classes);
+  if (elm) {
+    elm.classList.toggle(classes);
+  }
 };
 
 export const removeClasses = (elm, classes) => {
-  elm.classList.remove(...classes.split(' '));
+  if (elm) {
+    elm.classList.remove(...classes.split(' '));
+  }
 };
 
 export const onLocationChange = ({ referrerURL, referrerHost }) => {

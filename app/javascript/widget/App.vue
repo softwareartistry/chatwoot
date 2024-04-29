@@ -43,6 +43,7 @@ import {
 } from './constants/widgetBusEvents';
 import darkModeMixin from 'widget/mixins/darkModeMixin';
 import { SDK_SET_BUBBLE_VISIBILITY } from '../shared/constants/sharedFrameEvents';
+import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 
 export default {
   name: 'App',
@@ -327,6 +328,9 @@ export default {
           }
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
+        } else if (message.event === 'set-jeeves-info') {
+          tokenHelperInstance.init(message);
+          this.$store.dispatch('appConfig/setJeevesInfo', message);
         }
       });
     },

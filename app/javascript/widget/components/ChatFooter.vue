@@ -29,14 +29,14 @@
     >
       {{ $t('START_NEW_CONVERSATION') }}
     </custom-button>
-    <custom-button
+    <!-- <custom-button
       v-if="showEmailTranscriptButton"
       type="clear"
       class="font-normal"
       @click="sendTranscript"
     >
       {{ $t('EMAIL_TRANSCRIPT.BUTTON_TEXT') }}
-    </custom-button>
+    </custom-button> -->
   </div>
 </template>
 
