@@ -147,6 +147,14 @@ export default {
     hasLiveAgentEnabled() {
       return this.jeevesInfo?.hasLiveAgentEnabled;
     },
+    getLastCommunicatedAgent() {
+      const allMessages = Object.values(this.allMessages);
+      const receivedMessages = allMessages?.filter(
+        message => message.message_type === 1 && message.sender?.type === 'user'
+      );
+      const lastMessage = receivedMessages[receivedMessages.length - 1];
+      return lastMessage?.sender;
+    },
     isOnline() {
       const allMessages = Object.values(this.allMessages);
       if (this.availableAgents.length && allMessages.length) {
@@ -211,22 +219,36 @@ export default {
 
       try {
         const token = await tokenHelperInstance.getToken();
+        const agent = this.getLastCommunicatedAgent();
+
+        const tokens = await axios({
+          method: 'POST',
+          url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/meeting/userAccessToken`,
+          headers: { Authorization: `Bearer ${token}` },
+          data: {
+            user_name: agent.name,
+            user_email: '',
+          },
+        });
+
         const response = await axios({
           method: 'post',
           url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/cacheValue`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
-            name: this.currentUser.name,
-            email: this.currentUser.email,
+            user_token: tokens.data.user_token,
+            agent_token: tokens.data.agent_token,
+            room: this.roomNameSuffix,
+            token,
           },
         });
 
-        const inviteLink = `https://okjeeves.${env}/meeting.html?invite=${this.roomNameSuffix}`;
+        const inviteLink = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${this.jeevesInfo.tenant}&env=${env}&joinee=1`;
         await this.sendMessage({
           content: `Call initiated. Join using: ${inviteLink}`,
         });
 
-        const launchUrl = `https://okjeeves.${env}/meeting.html?room=${this.roomNameSuffix}&key=${response.data}&tenant=${this.jeevesInfo.tenant}`;
+        const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${this.jeevesInfo.tenant}&env=${env}`;
         const anchorElm = document.createElement('a');
         anchorElm.href = launchUrl;
         anchorElm.target = '_blank';
