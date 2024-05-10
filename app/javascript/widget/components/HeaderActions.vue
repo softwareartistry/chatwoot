@@ -147,14 +147,6 @@ export default {
     hasLiveAgentEnabled() {
       return this.jeevesInfo?.hasLiveAgentEnabled;
     },
-    getLastCommunicatedAgent() {
-      const allMessages = Object.values(this.allMessages);
-      const receivedMessages = allMessages?.filter(
-        message => message.message_type === 1 && message.sender?.type === 'user'
-      );
-      const lastMessage = receivedMessages[receivedMessages.length - 1];
-      return lastMessage?.sender;
-    },
     isOnline() {
       const allMessages = Object.values(this.allMessages);
       if (this.availableAgents.length && allMessages.length) {
@@ -219,14 +211,26 @@ export default {
 
       try {
         const token = await tokenHelperInstance.getToken();
-        const agent = this.getLastCommunicatedAgent();
+
+        const allMessages = Object.values(this.allMessages);
+        const receivedMessages = allMessages?.filter(
+          message =>
+            message.message_type === 1 && message.sender?.type === 'user'
+        );
+        const lastMessage = receivedMessages[receivedMessages.length - 1];
+        // eslint-disable-next-line no-console
+        console.log('lastMessage', lastMessage);
+
+        const agentName = lastMessage.sender.name || '';
+        // eslint-disable-next-line no-console
+        console.log('agentName', agentName);
 
         const tokens = await axios({
           method: 'POST',
           url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/meeting/userAccessToken`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
-            user_name: agent.name,
+            user_name: agentName,
             user_email: '',
           },
         });
