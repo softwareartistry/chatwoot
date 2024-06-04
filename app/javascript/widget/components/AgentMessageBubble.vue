@@ -72,6 +72,7 @@ import darkModeMixin from 'widget/mixins/darkModeMixin.js';
 import IntegrationCard from './template/IntegrationCard.vue';
 import { mapGetters } from 'vuex';
 import { IFrameHelper } from '../helpers/utils';
+import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 
 export default {
   name: 'AgentMessageBubble',
@@ -146,7 +147,11 @@ export default {
     },
   },
   onLinkClick(e) {
-    if (this.jeevesInfo.isEhrLaunch) {
+    // eslint-disable-next-line no-console
+    console.log('isEhrLaunch ', tokenHelperInstance.isEhrLaunch);
+    // eslint-disable-next-line no-console
+    console.log('elm ', e.srcElement.href);
+    if (tokenHelperInstance.isEhrLaunch) {
       e.preventDefault();
       IFrameHelper.sendMessage({
         event: 'jeevesLaunchInDefaultBrowser',
