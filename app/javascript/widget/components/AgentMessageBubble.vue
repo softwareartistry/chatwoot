@@ -145,18 +145,20 @@ export default {
       });
     },
   },
-  onLinkClick(e) {
+  onLinkClick() {
     // eslint-disable-next-line no-console
     console.log('isEhrLaunch ', tokenHelperInstance.isEhrLaunch);
     // eslint-disable-next-line no-console
-    console.log('elm ', e.srcElement.href);
-    if (tokenHelperInstance.isEhrLaunch) {
-      e.preventDefault();
-      IFrameHelper.sendMessage({
-        event: 'jeevesLaunchInDefaultBrowser',
-        url: e.srcElement.href,
-      });
-    }
+    console.log('button clicked', tokenHelperInstance.isEhrLaunch);
+    // eslint-disable-next-line no-console
+    // console.log('elm ', e.srcElement.href);
+    // if (tokenHelperInstance.isEhrLaunch) {
+    //   e.preventDefault();
+    //   IFrameHelper.sendMessage({
+    //     event: 'jeevesLaunchInDefaultBrowser',
+    //     url: e.srcElement.href,
+    //   });
+    // }
   },
 };
 </script>
