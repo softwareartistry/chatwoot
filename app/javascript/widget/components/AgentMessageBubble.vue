@@ -12,6 +12,9 @@
         class="message-content text-slate-900 dark:text-slate-50"
         @click="onLinkClick"
       />
+      <button class="message-content" @click="onLinkClick">
+        Open Link in default browser
+      </button>
       <email-input
         v-if="isTemplateEmail"
         :message-id="messageId"
@@ -70,7 +73,6 @@ import EmailInput from './template/EmailInput.vue';
 import CustomerSatisfaction from 'shared/components/CustomerSatisfaction.vue';
 import darkModeMixin from 'widget/mixins/darkModeMixin.js';
 import IntegrationCard from './template/IntegrationCard.vue';
-import { mapGetters } from 'vuex';
 import { IFrameHelper } from '../helpers/utils';
 import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 
@@ -97,9 +99,6 @@ export default {
     },
   },
   computed: {
-    ...mapGetters({
-      jeevesInfo: 'appConfig/getJeevesInfo',
-    }),
     isTemplate() {
       return this.messageType === 3;
     },
