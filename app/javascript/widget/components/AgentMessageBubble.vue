@@ -10,6 +10,7 @@
       <div
         v-dompurify-html="formatMessage(message, false)"
         class="message-content text-slate-900 dark:text-slate-50"
+        @click="onLinkClick"
       />
       <email-input
         v-if="isTemplateEmail"
@@ -69,6 +70,8 @@ import EmailInput from './template/EmailInput.vue';
 import CustomerSatisfaction from 'shared/components/CustomerSatisfaction.vue';
 import darkModeMixin from 'widget/mixins/darkModeMixin.js';
 import IntegrationCard from './template/IntegrationCard.vue';
+import { mapGetters } from 'vuex';
+import { IFrameHelper } from '../helpers/utils';
 
 export default {
   name: 'AgentMessageBubble',
@@ -93,6 +96,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      jeevesInfo: 'appConfig/getJeevesInfo',
+    }),
     isTemplate() {
       return this.messageType === 3;
     },
@@ -138,6 +144,15 @@ export default {
         messageId: this.messageId,
       });
     },
+  },
+  onLinkClick(e) {
+    if (this.jeevesInfo.isEhrLaunch) {
+      e.preventDefault();
+      IFrameHelper.sendMessage({
+        event: 'jeevesLaunchInDefaultBrowser',
+        url: e.srcElement.href,
+      });
+    }
   },
 };
 </script>
