@@ -29,6 +29,8 @@ class TokenHelper {
 
   refreshQueue = [];
 
+  isEhrLaunch;
+
   isTokenExpired(minValidity) {
     if (!this.tokenParsed || !this.refreshToken || !this.tokenParsed.exp) {
       // console.log('Not authenticated');
@@ -130,6 +132,7 @@ class TokenHelper {
       tenant,
       env,
       hasLiveAgentEnabled,
+      isEhrLaunch,
     } = message;
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
@@ -137,6 +140,7 @@ class TokenHelper {
     this.tenant = tenant;
     this.env = env;
     this.hasLiveAgentEnabled = hasLiveAgentEnabled;
+    this.isEhrLaunch = isEhrLaunch;
 
     // ignore
     // eslint-disable-next-line no-console
