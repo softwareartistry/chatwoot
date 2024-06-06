@@ -144,21 +144,21 @@ export default {
         messageId: this.messageId,
       });
     },
-  },
-  onLinkClick() {
-    // eslint-disable-next-line no-console
-    console.log('isEhrLaunch ', tokenHelperInstance.isEhrLaunch);
-    // eslint-disable-next-line no-console
-    console.log('button clicked', tokenHelperInstance.isEhrLaunch);
-    // eslint-disable-next-line no-console
-    // console.log('elm ', e.srcElement.href);
-    // if (tokenHelperInstance.isEhrLaunch) {
-    //   e.preventDefault();
-    //   IFrameHelper.sendMessage({
-    //     event: 'jeevesLaunchInDefaultBrowser',
-    //     url: e.srcElement.href,
-    //   });
-    // }
+    onLinkClick(e) {
+      // eslint-disable-next-line no-console
+      console.log('isEhrLaunch ', tokenHelperInstance.isEhrLaunch);
+      // eslint-disable-next-line no-console
+      console.log('button clicked', tokenHelperInstance.isEhrLaunch);
+      // eslint-disable-next-line no-console
+      console.log('elm ', e.srcElement.href);
+      if (tokenHelperInstance.isEhrLaunch) {
+        e.preventDefault();
+        IFrameHelper.sendMessage({
+          event: 'jeevesLaunchInDefaultBrowser',
+          url: e.srcElement.href,
+        });
+      }
+    },
   },
 };
 </script>
