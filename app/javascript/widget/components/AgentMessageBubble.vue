@@ -145,13 +145,7 @@ export default {
       });
     },
     onLinkClick(e) {
-      // eslint-disable-next-line no-console
-      console.log('isEhrLaunch ', tokenHelperInstance.isEhrLaunch);
-      // eslint-disable-next-line no-console
-      console.log('button clicked', tokenHelperInstance.isEhrLaunch);
-      // eslint-disable-next-line no-console
-      console.log('elm ', e.srcElement.href);
-      if (tokenHelperInstance.isEhrLaunch) {
+      if (tokenHelperInstance.isEhrLaunch && e.srcElement.href) {
         e.preventDefault();
         IFrameHelper.sendMessage({
           event: 'jeevesLaunchInDefaultBrowser',
