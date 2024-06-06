@@ -12,9 +12,6 @@
         class="message-content text-slate-900 dark:text-slate-50"
         @click="onLinkClick"
       />
-      <button class="message-content" @click="onLinkClick">
-        Open Link in default browser
-      </button>
       <email-input
         v-if="isTemplateEmail"
         :message-id="messageId"
