@@ -11,6 +11,7 @@ import {
 const state = {
   hideMessageBubble: false,
   isCampaignViewClicked: false,
+  showUnreadMessagesDialog: true,
   isWebWidgetTriggered: false,
   isWidgetOpen: false,
   position: 'right',
@@ -31,6 +32,7 @@ export const getters = {
   isWidgetStyleFlat: $state => $state.widgetStyle === 'flat',
   darkMode: $state => $state.darkMode,
   getJeevesInfo: $state => $state.jeevesInfo,
+  getShowUnreadMessagesDialog: $state => $state.showUnreadMessagesDialog,
 };
 
 export const actions = {
@@ -40,6 +42,7 @@ export const actions = {
       showPopoutButton,
       position,
       hideMessageBubble,
+      showUnreadMessagesDialog,
       widgetStyle = 'rounded',
       darkMode = 'light',
     }
@@ -48,6 +51,7 @@ export const actions = {
       hideMessageBubble: !!hideMessageBubble,
       position: position || 'right',
       showPopoutButton: !!showPopoutButton,
+      showUnreadMessagesDialog: !!showUnreadMessagesDialog,
       widgetStyle,
       darkMode,
     });
@@ -80,6 +84,7 @@ export const mutations = {
     $state.widgetStyle = data.widgetStyle;
     $state.darkMode = data.darkMode;
     $state.locale = data.locale || $state.locale;
+    $state.showUnreadMessagesDialog = data.showUnreadMessagesDialog;
   },
   [TOGGLE_WIDGET_OPEN]($state, isWidgetOpen) {
     $state.isWidgetOpen = isWidgetOpen;
