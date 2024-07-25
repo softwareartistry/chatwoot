@@ -115,7 +115,11 @@ export default {
       'setBubbleVisibility',
       'setColorScheme',
     ]),
-    ...mapActions('conversation', ['fetchOldConversations', 'setUserLastSeen']),
+    ...mapActions('conversation', [
+      'fetchOldConversations',
+      'setUserLastSeen',
+      'sendMessage',
+    ]),
     ...mapActions('campaign', [
       'initCampaigns',
       'executeCampaign',
@@ -337,11 +341,15 @@ export default {
           }
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
-        } else if (message.event === 'set-jeeves-info') {
+        } else if (message.event === 'jeeves-set-info') {
           // eslint-disable-next-line no-console
           console.log({ jeevesInfo: message });
           tokenHelperInstance.init(message);
           this.$store.dispatch('appConfig/setJeevesInfo', message);
+        } else if (message.event === 'jeeves-send-message-to-bot') {
+          // eslint-disable-next-line no-console
+          console.log('jeeves sent message to bot', message.message);
+          this.sendMessage({ content: message.message });
         }
       });
     },
