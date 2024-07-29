@@ -107,6 +107,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      restarted: 'conversation/getRestarted',
       conversationAttributes: 'conversationAttributes/getConversationParams',
       currentUser: 'contacts/getCurrentUser',
       jeevesInfo: 'appConfig/getJeevesInfo',
@@ -136,6 +137,9 @@ export default {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
     hideReplyBox() {
+      if (this.restarted) {
+        return false; // Jeeves code
+      }
       const { allowMessagesAfterResolved } = window.chatwootWebChannel;
       const { status } = this.conversationAttributes;
       return !allowMessagesAfterResolved && status === 'resolved';

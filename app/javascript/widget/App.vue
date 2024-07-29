@@ -121,6 +121,8 @@ export default {
       'fetchOldConversations',
       'setUserLastSeen',
       'sendMessage',
+      'clearConversations',
+      'setRestarted',
     ]),
     ...mapActions('campaign', [
       'initCampaigns',
@@ -351,19 +353,22 @@ export default {
           if (allMsgs.length > 0) {
             this.$store.dispatch('conversation/resolveConversation');
           }
+          this.setRestarted(true);
           if (this.clearConversations) {
             this.clearConversations();
           }
-          if (this.clearConversationAttributes) {
-            this.clearConversationAttributes();
-          }
-          this.replaceRoute('messages');
+          // if (this.clearConversationAttributes) {
+          //   this.clearConversationAttributes();
+          // }
+          // this.replaceRoute('messages');
           IFrameHelper.sendMessage({
             event: 'onEvent',
             eventIdentifier: CHATWOOT_ON_START_CONVERSATION,
             data: { hasConversation: true },
           });
-          this.sendMessage({ content: message.message });
+          this.sendMessage({ content: message.message }).then(() => {
+            this.setRestarted(false);
+          });
         }
       });
     },

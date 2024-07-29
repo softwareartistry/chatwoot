@@ -72,6 +72,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      restarted: 'conversation/getRestarted',
       conversationAttributes: 'conversationAttributes/getConversationParams',
       widgetColor: 'appConfig/getWidgetColor',
       conversationSize: 'conversation/getConversationSize',
@@ -82,6 +83,9 @@ export default {
       return getContrastingTextColor(this.widgetColor);
     },
     hideReplyBox() {
+      if (this.restarted) {
+        return false; // Jeeves code
+      }
       const { allowMessagesAfterResolved } = window.chatwootWebChannel;
       const { status } = this.conversationAttributes;
       return !allowMessagesAfterResolved && status === 'resolved';
