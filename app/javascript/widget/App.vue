@@ -73,6 +73,7 @@ export default {
       unreadMessageCount: 'conversation/getUnreadMessageCount',
       isWidgetStyleFlat: 'appConfig/isWidgetStyleFlat',
       showUnreadMessagesDialog: 'appConfig/getShowUnreadMessagesDialog',
+      allMessages: 'conversation/getConversation',
     }),
     isIFrame() {
       return IFrameHelper.isIFrame();
@@ -342,13 +343,13 @@ export default {
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
         } else if (message.event === 'jeeves-set-info') {
-          // eslint-disable-next-line no-console
-          console.log({ jeevesInfo: message });
           tokenHelperInstance.init(message);
           this.$store.dispatch('appConfig/setJeevesInfo', message);
         } else if (message.event === 'jeeves-send-message-to-bot') {
-          // eslint-disable-next-line no-console
-          console.log('jeeves sent message to bot', message.message);
+          const allMsgs = Object.values(this.allMessages);
+          if (allMsgs.length > 0) {
+            this.$store.dispatch('conversation/resolveConversation');
+          }
           this.sendMessage({ content: message.message });
         }
       });
