@@ -45,6 +45,7 @@ import darkModeMixin from 'widget/mixins/darkModeMixin';
 import { SDK_SET_BUBBLE_VISIBILITY } from '../shared/constants/sharedFrameEvents';
 import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 import { emitter } from 'shared/helpers/mitt';
+import { CHATWOOT_ON_START_CONVERSATION } from './constants/sdkEvents';
 
 export default {
   name: 'App',
@@ -73,6 +74,7 @@ export default {
       unreadMessageCount: 'conversation/getUnreadMessageCount',
       isWidgetStyleFlat: 'appConfig/isWidgetStyleFlat',
       showUnreadMessagesDialog: 'appConfig/getShowUnreadMessagesDialog',
+      allMessages: 'conversation/getConversation',
     }),
     isIFrame() {
       return IFrameHelper.isIFrame();
@@ -342,13 +344,25 @@ export default {
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
         } else if (message.event === 'jeeves-set-info') {
-          // eslint-disable-next-line no-console
-          console.log({ jeevesInfo: message });
           tokenHelperInstance.init(message);
           this.$store.dispatch('appConfig/setJeevesInfo', message);
         } else if (message.event === 'jeeves-send-message-to-bot') {
-          // eslint-disable-next-line no-console
-          console.log('jeeves sent message to bot', message.message);
+          const allMsgs = Object.values(this.allMessages);
+          if (allMsgs.length > 0) {
+            this.$store.dispatch('conversation/resolveConversation');
+          }
+          if (this.clearConversations) {
+            this.clearConversations();
+          }
+          if (this.clearConversationAttributes) {
+            this.clearConversationAttributes();
+          }
+          this.replaceRoute('messages');
+          IFrameHelper.sendMessage({
+            event: 'onEvent',
+            eventIdentifier: CHATWOOT_ON_START_CONVERSATION,
+            data: { hasConversation: true },
+          });
           this.sendMessage({ content: message.message });
         }
       });

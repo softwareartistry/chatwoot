@@ -109,9 +109,10 @@ export default {
   },
   methods: {
     startConversation() {
-      if (this.preChatFormEnabled && !this.conversationSize) {
-        return this.replaceRoute('prechat-form');
-      }
+      // TODO: Jeeves removed it
+      // if (this.preChatFormEnabled && !this.conversationSize) {
+      //   return this.replaceRoute('prechat-form');
+      // }
       return this.replaceRoute('messages');
     },
     openArticleInArticleViewer(link) {
