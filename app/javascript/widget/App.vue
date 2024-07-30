@@ -357,10 +357,10 @@ export default {
           if (this.clearConversations) {
             this.clearConversations();
           }
-          // if (this.clearConversationAttributes) {
-          //   this.clearConversationAttributes();
-          // }
-          // this.replaceRoute('messages');
+          if (this.clearConversationAttributes) {
+            this.clearConversationAttributes();
+          }
+          this.replaceRoute('messages');
           IFrameHelper.sendMessage({
             event: 'onEvent',
             eventIdentifier: CHATWOOT_ON_START_CONVERSATION,
