@@ -174,6 +174,23 @@ export default {
           this.$store.dispatch('conversation/setUserLastSeen');
         }
         this.setUnreadView();
+        const allMessages = Object.values(this.allMessages);
+        if (allMessages) {
+          const lastMessage = allMessages[allMessages.length - 1];
+          if (
+            lastMessage.sender &&
+            (lastMessage.sender.type === 'user' ||
+              (lastMessage.sender.type === 'contact' &&
+                lastMessage.content === 'Connect me to a Live Agent'))
+          ) {
+            // eslint-disable-next-line no-console
+            console.log('connect to live agent', true);
+            IFrameHelper.sendMessage({
+              event: 'jeeves-connected-to-live-agent',
+              connected: true,
+            });
+          }
+        }
       });
       emitter.on(ON_UNREAD_MESSAGE_CLICK, () => {
         this.replaceRoute('messages').then(() => this.unsetUnreadView());
@@ -270,7 +287,13 @@ export default {
         if (message.event === 'config-set') {
           this.setLocale(message.locale);
           this.setBubbleLabel();
-          this.fetchOldConversations().then(() => this.setUnreadView());
+          this.fetchOldConversations().then(() => {
+            const conversations =
+              this.$store.getters['conversation/getConversation'];
+            // eslint-disable-next-line no-console
+            console.log('conv', conversations);
+            this.setUnreadView();
+          });
           this.fetchAvailableAgents(websiteToken);
           this.setAppConfig(message);
           this.$store.dispatch('contacts/get');
