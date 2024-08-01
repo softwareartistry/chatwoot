@@ -182,7 +182,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions('conversation', ['sendMessage']),
+    ...mapActions('conversation', ['sendMessage', 'setRestarted',]),
     popoutWindow() {
       this.closeWindow();
       const {
@@ -205,6 +205,7 @@ export default {
       }
     },
     resolveConversation() {
+      this.setRestarted(false);
       this.$store.dispatch('conversation/resolveConversation');
     },
     async initiateMeeting() {
