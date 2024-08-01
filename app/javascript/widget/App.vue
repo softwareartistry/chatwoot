@@ -122,8 +122,8 @@ export default {
       'setUserLastSeen',
       'sendMessage',
       'clearConversations',
-      'setRestarted',
     ]),
+    ...mapActions('conversationAttributes', ['clearConversationAttributes']),
     ...mapActions('campaign', [
       'initCampaigns',
       'executeCampaign',
@@ -180,8 +180,7 @@ export default {
           if (
             lastMessage.sender &&
             (lastMessage.sender.type === 'user' ||
-              (lastMessage.sender.type === 'contact' &&
-                lastMessage.content === 'Connect me to a Live Agent'))
+              (lastMessage.sender.type === 'contact' && lastMessage.content === 'Connect me to a Live Agent'))
           ) {
             // eslint-disable-next-line no-console
             console.log('connect to live agent', true);
@@ -288,20 +287,14 @@ export default {
           this.setLocale(message.locale);
           this.setBubbleLabel();
           this.fetchOldConversations().then(() => {
-            const conversations =
-              this.$store.getters['conversation/getConversation'];
-            // eslint-disable-next-line no-console
-            console.log('conv', conversations);
-            if (conversations) { // jeeves code
+            const conversations = this.$store.getters['conversation/getConversation'];
+            if (conversations) {
+              // jeeves code
               const allMsgs = Object.values(conversations);
-              const receivedMessages = allMsgs?.filter(
-                message => message.message_type === 1
-              );
+              const receivedMessages = allMsgs?.filter(msg => msg.message_type === 1);
               if (receivedMessages?.length) {
                 const lastMessage = receivedMessages[receivedMessages.length - 1];
                 if (!lastMessage || (lastMessage && lastMessage?.sender?.type === 'user')) {
-                  // eslint-disable-next-line no-console
-                  console.log('in all connect to live agent', true);
                   IFrameHelper.sendMessage({
                     event: 'jeeves-connected-to-live-agent',
                     connected: true,
@@ -385,26 +378,26 @@ export default {
           }
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
-        } else if (message.event === 'jeeves-set-info') { // jeeves code
+        } else if (message.event === 'jeeves-set-info') {
+          // jeeves code
           tokenHelperInstance.init(message);
-          this.$store.dispatch('appConfig/setJeevesInfo', message);
-        } else if (message.event === 'jeeves-send-message-to-bot' && this.allMessages) { // jeeves code
+        } else if (message.event === 'jeeves-send-message-to-bot' && this.allMessages) {
+          // jeeves code
           const allMsgs = Object.values(this.allMessages);
           if (allMsgs.length > 0) {
-            this.$store.dispatch('conversation/resolveConversation');
+            this.$store.dispatch('conversation/resolveConversation').then(() => {
+              if (this.clearConversations) {
+                this.clearConversations();
+              }
+              this.sendMessage({ content: message.message }).then(() => {
+                this.getAttributes();
+              });
+            });
+          } else {
+            this.sendMessage({ content: message.message }).then(() => {
+              this.getAttributes();
+            });
           }
-          this.setRestarted(true);
-          if (this.clearConversations) {
-            this.clearConversations();
-          }
-          IFrameHelper.sendMessage({
-            event: 'onEvent',
-            eventIdentifier: CHATWOOT_ON_START_CONVERSATION,
-            data: { hasConversation: true },
-          });
-          setTimeout(() => {
-            this.sendMessage({ content: message.message });
-          }, 500);
         }
       });
     },

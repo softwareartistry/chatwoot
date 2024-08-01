@@ -106,7 +106,4 @@ export const mutations = {
     const { id } = lastMessage;
     $state.lastMessageId = id;
   },
-  setRestarted($state, restarted) {
-    $state.restarted = restarted; // jeeves code
-  },
 };

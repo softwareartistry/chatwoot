@@ -4,7 +4,6 @@ import { groupConversationBySender } from './helpers';
 import { formatUnixDate } from 'shared/helpers/DateHelper';
 
 export const getters = {
-  getRestarted: _state => _state.restarted, // jeeves code
   getAllMessagesLoaded: _state => _state.uiFlags.allMessagesLoaded,
   getIsCreating: _state => _state.uiFlags.isCreating,
   getIsAgentTyping: _state => _state.uiFlags.isAgentTyping,

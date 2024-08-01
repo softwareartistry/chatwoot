@@ -3,7 +3,6 @@ import { actions } from './actions';
 import { mutations } from './mutations';
 
 const state = {
-  restarted: false, // jeeves code
   conversations: {},
   meta: {
     userLastSeenAt: undefined,

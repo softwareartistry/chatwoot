@@ -194,7 +194,4 @@ export const actions = {
       // IgnoreError
     }
   },
-  setRestarted: async ({ commit }, restarted) => {
-    commit('setRestarted', restarted); // jeeves code
-  },
 };
