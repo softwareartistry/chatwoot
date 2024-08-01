@@ -402,7 +402,9 @@ export default {
             eventIdentifier: CHATWOOT_ON_START_CONVERSATION,
             data: { hasConversation: true },
           });
-          this.sendMessage({ content: message.message });
+          setTimeout(() => {
+            this.sendMessage({ content: message.message });
+          }, 500);
         }
       });
     },
