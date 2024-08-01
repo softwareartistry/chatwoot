@@ -292,6 +292,23 @@ export default {
               this.$store.getters['conversation/getConversation'];
             // eslint-disable-next-line no-console
             console.log('conv', conversations);
+            if (conversations) { // jeeves code
+              const allMsgs = Object.values(conversations);
+              const receivedMessages = allMsgs?.filter(
+                message => message.message_type === 1
+              );
+              if (receivedMessages?.length) {
+                const lastMessage = receivedMessages[receivedMessages.length - 1];
+                if (!lastMessage || (lastMessage && lastMessage?.sender?.type === 'user')) {
+                  // eslint-disable-next-line no-console
+                  console.log('in all connect to live agent', true);
+                  IFrameHelper.sendMessage({
+                    event: 'jeeves-connected-to-live-agent',
+                    connected: true,
+                  });
+                }
+              }
+            }
             this.setUnreadView();
           });
           this.fetchAvailableAgents(websiteToken);
@@ -368,10 +385,10 @@ export default {
           }
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
-        } else if (message.event === 'jeeves-set-info') {
+        } else if (message.event === 'jeeves-set-info') { // jeeves code
           tokenHelperInstance.init(message);
           this.$store.dispatch('appConfig/setJeevesInfo', message);
-        } else if (message.event === 'jeeves-send-message-to-bot') {
+        } else if (message.event === 'jeeves-send-message-to-bot' && this.allMessages) { // jeeves code
           const allMsgs = Object.values(this.allMessages);
           if (allMsgs.length > 0) {
             this.$store.dispatch('conversation/resolveConversation');
@@ -380,10 +397,6 @@ export default {
           if (this.clearConversations) {
             this.clearConversations();
           }
-          if (this.clearConversationAttributes) {
-            this.clearConversationAttributes();
-          }
-          this.replaceRoute('messages');
           IFrameHelper.sendMessage({
             event: 'onEvent',
             eventIdentifier: CHATWOOT_ON_START_CONVERSATION,
