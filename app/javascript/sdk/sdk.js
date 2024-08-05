@@ -121,10 +121,12 @@ export const SDK_CSS = `
 
 .woot-widget-bubble.woot-elements--left {
   left: 20px;
+  bottom: 58px;
 }
 
 .woot-widget-bubble.woot-elements--right {
   right: 20px;
+  bottom: 58px;
 }
 
 .woot-widget-bubble:hover {
@@ -146,9 +148,12 @@ export const SDK_CSS = `
 @media only screen and (min-width: 667px) {
   .woot-widget-holder.woot-elements--left {
     left: 20px;
+    bottom: 140px;
+
  }
   .woot-widget-holder.woot-elements--right {
     right: 20px;
+    bottom: 140px;
  }
 }
 
