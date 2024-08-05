@@ -109,7 +109,6 @@ export default {
     ...mapGetters({
       conversationAttributes: 'conversationAttributes/getConversationParams',
       currentUser: 'contacts/getCurrentUser',
-      jeevesInfo: 'appConfig/getJeevesInfo',
       allMessages: 'conversation/getConversation',
       availableAgents: 'agent/availableAgents',
     }),
@@ -145,7 +144,7 @@ export default {
       return allMessages.length > 0;
     },
     hasLiveAgentEnabled() {
-      return this.jeevesInfo?.hasLiveAgentEnabled;
+      return tokenHelperInstance?.hasLiveAgentEnabled;
     },
     isOnline() {
       const allMessages = Object.values(this.allMessages);
@@ -178,7 +177,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions('conversation', ['sendMessage']),
+    ...mapActions('conversation', ['sendMessage',]),
     popoutWindow() {
       this.closeWindow();
       const {
@@ -201,6 +200,10 @@ export default {
       }
     },
     resolveConversation() {
+      IFrameHelper.sendMessage({
+        event: 'jeeves-connected-to-live-agent',
+        connected: false,
+      });
       this.$store.dispatch('conversation/resolveConversation');
     },
     async initiateMeeting() {
@@ -227,7 +230,7 @@ export default {
 
         const tokens = await axios({
           method: 'POST',
-          url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/meeting/userAccessToken`,
+          url: `https://${tokenHelperInstance.tenant}.jeeves.314ecorp.${env}/api/v1/meeting/userAccessToken`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
             user_name: agentName,
@@ -237,7 +240,7 @@ export default {
 
         const response = await axios({
           method: 'post',
-          url: `https://${this.jeevesInfo.tenant}.jeeves.314ecorp.${env}/api/v1/cacheValue`,
+          url: `https://${tokenHelperInstance.tenant}.jeeves.314ecorp.${env}/api/v1/cacheValue`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
             user_token: tokens.data.user_token,
@@ -247,12 +250,12 @@ export default {
           },
         });
 
-        const inviteLink = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${this.jeevesInfo.tenant}&env=${env}&joinee=1`;
+        const inviteLink = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&joinee=1`;
         await this.sendMessage({
           content: `Call initiated. Join using: ${inviteLink}`,
         });
 
-        const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${this.jeevesInfo.tenant}&env=${env}`;
+        const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}`;
         const anchorElm = document.createElement('a');
         anchorElm.href = launchUrl;
         anchorElm.target = '_blank';
@@ -263,6 +266,10 @@ export default {
       }
     },
     async connectToLiveAgent() {
+      IFrameHelper.sendMessage({
+        event: 'jeeves-connected-to-live-agent',
+        connected: true,
+      });
       await this.sendMessage({
         content: 'Connect me to a Live Agent',
       });

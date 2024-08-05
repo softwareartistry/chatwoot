@@ -145,7 +145,7 @@ export default {
       if (tokenHelperInstance.isEhrLaunch && e.srcElement.href) {
         e.preventDefault();
         IFrameHelper.sendMessage({
-          event: 'jeevesLaunchInDefaultBrowser',
+          event: 'jeevesLaunchInDefaultBrowser', // jeeves code
           url: e.srcElement.href,
         });
       }
