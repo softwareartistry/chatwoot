@@ -1,8 +1,19 @@
 import { buildSearchParamsWithLocale } from '../helpers/urlParamsHelper';
 import { generateEventParams } from './events';
 
+const getRefererUrlOrigin = () => {
+  // jeeves code
+  try {
+    const newUrl = new URL(window.referrerURL || '');
+    return newUrl.origin;
+  } catch(e) {
+    return '';
+  }
+}
+
 const createConversation = params => {
-  const referrerURL = window.referrerURL || '';
+  // const referrerURL = window.referrerURL || '';
+  const referrerURL = getRefererUrlOrigin(); // jeeves code
   const search = buildSearchParamsWithLocale(window.location.search);
   return {
     url: `/api/v1/widget/conversations${search}`,
@@ -23,7 +34,9 @@ const createConversation = params => {
 };
 
 const sendMessage = (content, replyTo) => {
-  const referrerURL = window.referrerURL || '';
+  // const referrerURL = window.referrerURL || ''; // jeeves code
+  const referrerURL = getRefererUrlOrigin();
+
   const search = buildSearchParamsWithLocale(window.location.search);
   return {
     url: `/api/v1/widget/messages${search}`,
@@ -39,7 +52,7 @@ const sendMessage = (content, replyTo) => {
 };
 
 const sendAttachment = ({ attachment, replyTo = null }) => {
-  const { referrerURL = '' } = window;
+  // const { referrerURL = '' } = window; // jeeves code
   const timestamp = new Date().toString();
   const { file } = attachment;
 
@@ -49,6 +62,8 @@ const sendAttachment = ({ attachment, replyTo = null }) => {
   } else {
     formData.append('message[attachments][]', file, file.name);
   }
+
+  const referrerURL = getRefererUrlOrigin();
 
   formData.append('message[referer_url]', referrerURL);
   formData.append('message[timestamp]', timestamp);
