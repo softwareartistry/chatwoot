@@ -45,8 +45,14 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     darkMode: getDarkMode(chatwootSettings.darkMode),
     IFrameHelper: IFrameHelper,
     onToggle,
-    setJeevesInfo(jeevesInfo) {
+    // @deprecated
+    setJeevesInfo(jeevesInfo) { // jeeves code
       IFrameHelper.sendMessage('set-jeeves-info', jeevesInfo);
+    },
+    jeeves: { // jeeves code
+      dispatchEvent(event, data) {
+        IFrameHelper.sendMessage(event, data);
+      },
     },
     toggle(state) {
       IFrameHelper.events.toggleBubble(state);
