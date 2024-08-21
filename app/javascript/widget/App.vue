@@ -20,7 +20,9 @@ import {
 } from './constants/widgetBusEvents';
 import darkModeMixin from 'widget/mixins/darkModeMixin';
 import { SDK_SET_BUBBLE_VISIBILITY } from '../shared/constants/sharedFrameEvents';
+import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 import { emitter } from 'shared/helpers/mitt';
+import { CHATWOOT_ON_START_CONVERSATION } from './constants/sdkEvents';
 
 export default {
   name: 'App',
@@ -46,6 +48,7 @@ export default {
       unreadMessageCount: 'conversation/getUnreadMessageCount',
       isWidgetStyleFlat: 'appConfig/isWidgetStyleFlat',
       showUnreadMessagesDialog: 'appConfig/getShowUnreadMessagesDialog',
+      allMessages: 'conversation/getConversation',
     }),
     isIFrame() {
       return IFrameHelper.isIFrame();
@@ -88,7 +91,13 @@ export default {
       'setBubbleVisibility',
       'setColorScheme',
     ]),
-    ...mapActions('conversation', ['fetchOldConversations']),
+    ...mapActions('conversation', [
+      'fetchOldConversations',
+      'setUserLastSeen',
+      'sendMessage',
+      'clearConversations',
+    ]),
+    ...mapActions('conversationAttributes', ['clearConversationAttributes']),
     ...mapActions('campaign', [
       'initCampaigns',
       'executeCampaign',
@@ -139,6 +148,22 @@ export default {
           this.$store.dispatch('conversation/setUserLastSeen');
         }
         this.setUnreadView();
+        const allMessages = Object.values(this.allMessages);
+        if (allMessages) {
+          const lastMessage = allMessages[allMessages.length - 1];
+          if (
+            lastMessage.sender &&
+            (lastMessage.sender.type === 'user' ||
+              (lastMessage.sender.type === 'contact' && lastMessage.content === 'Connect me to a Live Agent'))
+          ) {
+            // eslint-disable-next-line no-console
+            console.log('connect to live agent', true);
+            IFrameHelper.sendMessage({
+              event: 'jeeves-connected-to-live-agent',
+              connected: true,
+            });
+          }
+        }
       });
       emitter.on(ON_UNREAD_MESSAGE_CLICK, () => {
         this.replaceRoute('messages').then(() => this.unsetUnreadView());
@@ -235,7 +260,24 @@ export default {
         if (message.event === 'config-set') {
           this.setLocale(message.locale);
           this.setBubbleLabel();
-          this.fetchOldConversations().then(() => this.setUnreadView());
+          this.fetchOldConversations().then(() => {
+            const conversations = this.$store.getters['conversation/getConversation'];
+            if (conversations) {
+              // jeeves code
+              const allMsgs = Object.values(conversations);
+              const receivedMessages = allMsgs?.filter(msg => msg.message_type === 1);
+              if (receivedMessages?.length) {
+                const lastMessage = receivedMessages[receivedMessages.length - 1];
+                if (!lastMessage || (lastMessage && lastMessage?.sender?.type === 'user')) {
+                  IFrameHelper.sendMessage({
+                    event: 'jeeves-connected-to-live-agent',
+                    connected: true,
+                  });
+                }
+              }
+            }
+            this.setUnreadView();
+          });
           this.fetchAvailableAgents(websiteToken);
           this.setAppConfig(message);
           this.$store.dispatch('contacts/get');
@@ -310,6 +352,26 @@ export default {
           }
         } else if (message.event === SDK_SET_BUBBLE_VISIBILITY) {
           this.setBubbleVisibility(message.hideMessageBubble);
+        } else if (message.event === 'jeeves-set-info') {
+          // jeeves code
+          tokenHelperInstance.init(message);
+        } else if (message.event === 'jeeves-send-message-to-bot' && this.allMessages) {
+          // jeeves code
+          const allMsgs = Object.values(this.allMessages);
+          if (allMsgs.length > 0) {
+            this.$store.dispatch('conversation/resolveConversation').then(() => {
+              if (this.clearConversations) {
+                this.clearConversations();
+              }
+              this.sendMessage({ content: message.message }).then(() => {
+                this.getAttributes();
+              });
+            });
+          } else {
+            this.sendMessage({ content: message.message }).then(() => {
+              this.getAttributes();
+            });
+          }
         }
       });
     },

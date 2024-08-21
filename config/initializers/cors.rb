@@ -15,6 +15,10 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
       resource '*', headers: :any, methods: :any, expose: %w[access-token client uid expiry]
     end
   end
+  allow do
+    origins 'localhost:4104', 'localhost:6174', 'localhost:2000'
+    resource '*', headers: :any, methods: [:get, :post, :patch, :put]
+  end
 end
 
 ################################################
