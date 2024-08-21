@@ -50,13 +50,25 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     locale = window.navigator.language.replace('-', '_');
   }
 
+  // jeeves code
+  let position = chatwootSettings.position === 'left' ? 'left' : 'right';
+  try {
+    const bubblePosition = JSON.parse(localStorage.getItem('chatwoot-bubble-position'));
+    if (bubblePosition) {
+      position = bubblePosition.isLeft ? 'left' : 'right';
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('custom woot bubble position not stored in local storage');
+  }
+
   window.$chatwoot = {
     baseUrl,
     baseDomain,
     hasLoaded: false,
     hideMessageBubble: chatwootSettings.hideMessageBubble || false,
     isOpen: false,
-    position: chatwootSettings.position === 'left' ? 'left' : 'right',
+    position,
     websiteToken,
     locale,
     useBrowserLanguage: chatwootSettings.useBrowserLanguage || false,
