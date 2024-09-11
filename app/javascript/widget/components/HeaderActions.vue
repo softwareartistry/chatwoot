@@ -1,80 +1,3 @@
-<template>
-  <div v-if="showHeaderActions" class="actions flex items-center">
-    <button
-      v-if="hasLiveAgentEnabled"
-      class="button transparent compact"
-      title="Connect to Live Agent"
-      :disabled="!canConnectToLiveAgent"
-      @click="connectToLiveAgent"
-    >
-      <fluent-icon
-        icon="chart-person"
-        type="outline"
-        size="22"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
-    </button>
-    <button
-      v-if="
-        hasLiveAgentEnabled &&
-        canLeaveConversation &&
-        hasEndConversationEnabled &&
-        showEndConversationButton
-      "
-      class="button transparent compact"
-      :disabled="!isOnline"
-      title="Start meeting"
-      @click="initiateMeeting"
-    >
-      <fluent-icon
-        icon="chat-video"
-        type="outline"
-        size="22"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
-    </button>
-    <button
-      v-if="
-        canLeaveConversation &&
-        hasEndConversationEnabled &&
-        showEndConversationButton
-      "
-      class="button transparent compact"
-      :title="$t('END_CONVERSATION')"
-      @click="resolveConversation"
-    >
-      <fluent-icon
-        icon="sign-out"
-        size="22"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
-    </button>
-    <button
-      v-if="showPopoutButton"
-      class="button transparent compact new-window--button"
-      @click="popoutWindow"
-    >
-      <fluent-icon
-        icon="open"
-        size="22"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
-    </button>
-    <button
-      class="button transparent compact close-button"
-      :class="{
-        'rn-close-button': isRNWebView,
-      }"
-      @click="closeWindow"
-    >
-      <fluent-icon
-        icon="dismiss"
-        size="24"
-        :class="$dm('text-black-900', 'dark:text-slate-50')"
-      />
-    </button>
-  </div>
-</template>
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import axios from 'axios';
@@ -256,6 +179,16 @@ export default {
         });
 
         const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}`;
+
+        if (tokenHelperInstance.isEhrLaunch) {
+          // eslint-disable-next-line no-console
+          console.log('launchUrl', launchUrl);
+          IFrameHelper.sendMessage({
+            event: 'jeevesLaunchInDefaultBrowser', // jeeves code
+            url: launchUrl,
+          });
+        }
+
         const anchorElm = document.createElement('a');
         anchorElm.href = launchUrl;
         anchorElm.target = '_blank';
@@ -277,6 +210,85 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div v-if="showHeaderActions" class="actions flex items-center">
+    <button
+      v-if="hasLiveAgentEnabled"
+      class="button transparent compact"
+      title="Connect to Live Agent"
+      :disabled="!canConnectToLiveAgent"
+      @click="connectToLiveAgent"
+    >
+      <FluentIcon
+        icon="chart-person"
+        type="outline"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+    <button
+      v-if="
+        hasLiveAgentEnabled &&
+        canLeaveConversation &&
+        hasEndConversationEnabled &&
+        showEndConversationButton
+      "
+      class="button transparent compact"
+      :disabled="!isOnline"
+      title="Start meeting"
+      @click="initiateMeeting"
+    >
+      <FluentIcon
+        icon="chat-video"
+        type="outline"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+    <button
+      v-if="
+        canLeaveConversation &&
+        hasEndConversationEnabled &&
+        showEndConversationButton
+      "
+      class="button transparent compact"
+      :title="$t('END_CONVERSATION')"
+      @click="resolveConversation"
+    >
+      <FluentIcon
+        icon="sign-out"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+    <button
+      v-if="showPopoutButton"
+      class="button transparent compact new-window--button"
+      @click="popoutWindow"
+    >
+      <FluentIcon
+        icon="open"
+        size="22"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+    <button
+      class="button transparent compact close-button"
+      :class="{
+        'rn-close-button': isRNWebView,
+      }"
+      @click="closeWindow"
+    >
+      <FluentIcon
+        icon="dismiss"
+        size="24"
+        :class="$dm('text-black-900', 'dark:text-slate-50')"
+      />
+    </button>
+  </div>
+</template>
+
 <style scoped lang="scss">
 @import '~widget/assets/scss/variables.scss';
 

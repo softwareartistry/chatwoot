@@ -1,26 +1,3 @@
-<template>
-  <div
-    v-if="!conversationSize && isFetchingList"
-    class="flex flex-1 items-center h-full bg-black-25 justify-center"
-    :class="{ dark: prefersDarkMode }"
-  >
-    <spinner size="" />
-  </div>
-  <div
-    v-else
-    class="flex flex-col justify-end h-full"
-    :class="{
-      'is-mobile': isMobile,
-      'is-widget-right': isRightAligned,
-      'is-bubble-hidden': hideMessageBubble,
-      'is-flat-design': isWidgetStyleFlat,
-      dark: prefersDarkMode,
-    }"
-  >
-    <router-view />
-  </div>
-</template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { setHeader } from 'widget/helpers/axios';
@@ -62,10 +39,7 @@ export default {
   computed: {
     ...mapGetters({
       activeCampaign: 'campaign/getActiveCampaign',
-      campaigns: 'campaign/getCampaigns',
       conversationSize: 'conversation/getConversationSize',
-      currentUser: 'contacts/getCurrentUser',
-      hasFetched: 'agent/getHasFetched',
       hideMessageBubble: 'appConfig/getHideMessageBubble',
       isFetchingList: 'conversation/getIsFetchingList',
       isRightAligned: 'appConfig/isRightAligned',
@@ -415,6 +389,29 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div
+    v-if="!conversationSize && isFetchingList"
+    class="flex items-center justify-center flex-1 h-full bg-black-25"
+    :class="{ dark: prefersDarkMode }"
+  >
+    <Spinner size="" />
+  </div>
+  <div
+    v-else
+    class="flex flex-col justify-end h-full"
+    :class="{
+      'is-mobile': isMobile,
+      'is-widget-right': isRightAligned,
+      'is-bubble-hidden': hideMessageBubble,
+      'is-flat-design': isWidgetStyleFlat,
+      dark: prefersDarkMode,
+    }"
+  >
+    <router-view />
+  </div>
+</template>
 
 <style lang="scss">
 @import '~widget/assets/scss/woot.scss';
