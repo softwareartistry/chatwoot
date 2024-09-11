@@ -179,6 +179,16 @@ export default {
         });
 
         const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}`;
+
+        if (tokenHelperInstance.isEhrLaunch) {
+          // eslint-disable-next-line no-console
+          console.log('launchUrl', launchUrl);
+          IFrameHelper.sendMessage({
+            event: 'jeevesLaunchInDefaultBrowser', // jeeves code
+            url: launchUrl,
+          });
+        }
+
         const anchorElm = document.createElement('a');
         anchorElm.href = launchUrl;
         anchorElm.target = '_blank';
