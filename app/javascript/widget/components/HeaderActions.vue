@@ -31,7 +31,6 @@ export default {
   computed: {
     ...mapGetters({
       conversationAttributes: 'conversationAttributes/getConversationParams',
-      currentUser: 'contacts/getCurrentUser',
       allMessages: 'conversation/getConversation',
       availableAgents: 'agent/availableAgents',
     }),
@@ -153,7 +152,7 @@ export default {
 
         const tokens = await axios({
           method: 'POST',
-          url: `https://${tokenHelperInstance.tenant}.jeeves.314ecorp.${env}/api/v1/meeting/userAccessToken`,
+          url: `https://${tokenHelperInstance.tenant}.api.okjeeves.${env}/api/v1/meeting/userAccessToken`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
             user_name: agentName,
@@ -163,7 +162,7 @@ export default {
 
         const response = await axios({
           method: 'post',
-          url: `https://${tokenHelperInstance.tenant}.jeeves.314ecorp.${env}/api/v1/cacheValue`,
+          url: `https://${tokenHelperInstance.tenant}.api.okjeeves.${env}/api/v1/cacheValue`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
             user_token: tokens.data.user_token,
