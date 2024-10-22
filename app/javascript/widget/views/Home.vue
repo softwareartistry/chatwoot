@@ -63,6 +63,7 @@ export default {
         locale,
       });
     }
+    this.replaceRoute('messages');
   },
   methods: {
     startConversation() {

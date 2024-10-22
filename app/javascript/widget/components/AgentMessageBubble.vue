@@ -8,6 +8,8 @@ import EmailInput from './template/EmailInput.vue';
 import CustomerSatisfaction from 'shared/components/CustomerSatisfaction.vue';
 import { useDarkMode } from 'widget/composables/useDarkMode';
 import IntegrationCard from './template/IntegrationCard.vue';
+import { IFrameHelper } from '../helpers/utils';
+import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 
 export default {
   name: 'AgentMessageBubble',
@@ -88,6 +90,15 @@ export default {
         messageId: this.messageId,
       });
     },
+    onLinkClick(e) {
+      if (tokenHelperInstance.isEhrLaunch && e.srcElement.href) {
+        e.preventDefault();
+        IFrameHelper.sendMessage({
+          event: 'jeevesLaunchInDefaultBrowser', // jeeves code
+          url: e.srcElement.href,
+        });
+      }
+    },
   },
 };
 </script>
@@ -104,6 +115,7 @@ export default {
       <div
         v-dompurify-html="formatMessage(message, false)"
         class="message-content text-slate-900 dark:text-slate-50"
+        @click="onLinkClick"
       />
       <EmailInput
         v-if="isTemplateEmail"

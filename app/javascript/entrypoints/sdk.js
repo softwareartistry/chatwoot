@@ -23,6 +23,7 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     return;
   }
 
+  const onToggle = window.chatwootOnToggle || null;
   if (window.Turbo) {
     // if this is a Rails Turbo app
     document.addEventListener('turbo:before-render', event =>
@@ -49,13 +50,25 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     locale = window.navigator.language.replace('-', '_');
   }
 
+  // jeeves code
+  let position = chatwootSettings.position === 'left' ? 'left' : 'right';
+  try {
+    const bubblePosition = JSON.parse(localStorage.getItem('chatwoot-bubble-position'));
+    if (bubblePosition) {
+      position = bubblePosition.isLeft ? 'left' : 'right';
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('custom woot bubble position not stored in local storage');
+  }
+
   window.$chatwoot = {
     baseUrl,
     baseDomain,
     hasLoaded: false,
     hideMessageBubble: chatwootSettings.hideMessageBubble || false,
     isOpen: false,
-    position: chatwootSettings.position === 'left' ? 'left' : 'right',
+    position,
     websiteToken,
     locale,
     useBrowserLanguage: chatwootSettings.useBrowserLanguage || false,
@@ -66,9 +79,18 @@ const runSDK = ({ baseUrl, websiteToken }) => {
     widgetStyle: getWidgetStyle(chatwootSettings.widgetStyle) || 'standard',
     resetTriggered: false,
     darkMode: getDarkMode(chatwootSettings.darkMode),
-
+    IFrameHelper: IFrameHelper,
+    onToggle,
+    jeeves: {
+      dispatchEvent(event, data) {
+        IFrameHelper.sendMessage(event, data);
+      },
+    },
     toggle(state) {
       IFrameHelper.events.toggleBubble(state);
+      if (window.$chatwoot.onToggle) {
+        window.$chatwoot.onToggle(state);
+      }
     },
 
     toggleBubbleVisibility(visibility) {

@@ -10,6 +10,75 @@ export const widgetHolder = document.createElement('div');
 
 export const bubbleHolder = document.createElement('div');
 export const chatBubble = document.createElement('button');
+chatBubble.draggable = true; // jeeves code
+
+// jeeves code
+const makeChatBubbleDraggable = target => {
+  if (!target) {
+    return;
+  }
+  try {
+    const bubblePosition = JSON.parse(localStorage.getItem('chatwoot-bubble-position'));
+    if (bubblePosition) {
+      target.style.setProperty('left', bubblePosition.x + 'px');
+      target.style.setProperty('top', bubblePosition.y + 'px');
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+
+  target.addEventListener('dragenter', event => {
+    event.preventDefault();
+    target.style.setProperty('opacity', 0);
+  });
+
+  target.addEventListener('dragover', event => {
+    event.preventDefault();
+    target.style.setProperty('opacity', 1);
+  });
+
+  target.addEventListener('drag', event => {
+    if (event.clientX && event.clientY) {
+      const elementWidth = target.offsetWidth;
+      const elementHeight = target.offsetHeight;
+
+      let newX = event.clientX;
+      let newY = event.clientY;
+
+      if (newX < 0) newX = 0;
+      if (newY < 0) newY = 0;
+      if (newX + elementWidth > window.innerWidth) newX = window.innerWidth - elementWidth;
+      if (newY + elementHeight > window.innerHeight) newY = window.innerHeight - elementHeight;
+
+      const newWidth = newX - target.clientWidth / 2;
+      const newHeight = newY - target.clientHeight / 2;
+
+      const isLeft = window.screen.width / 2 > newWidth;
+      window.localStorage.setItem('chatwoot-bubble-position', JSON.stringify({ x: newWidth, y: newHeight, isLeft }));
+
+      target.style.setProperty('left', newWidth + 'px');
+      target.style.setProperty('top', newHeight + 'px');
+
+      if (isLeft) {
+        window.$chatwoot.position = 'left';
+        const allElms = document.querySelectorAll('.woot-elements--right');
+        allElms?.forEach(elm => {
+          elm.classList.remove('woot-elements--right');
+          elm.classList.add('woot-elements--left');
+        });
+      } else {
+        window.$chatwoot.position = 'right';
+        const allElms = document.querySelectorAll('.woot-elements--left');
+        allElms?.forEach(elm => {
+          elm.classList.remove('woot-elements--left');
+          elm.classList.add('woot-elements--right');
+        });
+      }
+    }
+  });
+};
+
 export const closeBubble = document.createElement('button');
 export const notificationBubble = document.createElement('span');
 
@@ -53,6 +122,7 @@ export const createBubbleIcon = ({ className, path, target }) => {
 
   target.className = bubbleClassName;
   target.title = 'Open chat window';
+  makeChatBubbleDraggable(target); // jeeves code
   return target;
 };
 
