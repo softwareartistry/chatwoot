@@ -166,7 +166,7 @@ export default {
 
         const response = await axios({
           method: 'post',
-          url: `https://${tokenHelperInstance.serverUrl}/api/v1/cacheValue`,
+          url: `${tokenHelperInstance.serverUrl}/api/v1/cacheValue`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
             user_token: tokens.data.user_token,
