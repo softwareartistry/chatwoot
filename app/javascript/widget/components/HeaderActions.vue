@@ -156,7 +156,7 @@ export default {
 
         const tokens = await axios({
           method: 'POST',
-          url: `https://${tokenHelperInstance.tenant}.api.okjeeves.${env}/api/v1/meeting/userAccessToken`,
+          url: `${tokenHelperInstance.serverUrl}/api/v1/meeting/userAccessToken`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
             user_name: agentName,
@@ -166,7 +166,7 @@ export default {
 
         const response = await axios({
           method: 'post',
-          url: `https://${tokenHelperInstance.tenant}.api.okjeeves.${env}/api/v1/cacheValue`,
+          url: `https://${tokenHelperInstance.serverUrl}/api/v1/cacheValue`,
           headers: { Authorization: `Bearer ${token}` },
           data: {
             user_token: tokens.data.user_token,

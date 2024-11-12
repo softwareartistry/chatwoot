@@ -17,7 +17,7 @@ const createPromise = () => {
 class TokenHelper {
   tenant = '';
 
-  env = '';
+  playerEnv = '';
 
   accessToken = '';
 
@@ -28,6 +28,7 @@ class TokenHelper {
   timeSkew = 0;
 
   refreshQueue = [];
+  serverUrl = '';
 
   isEhrLaunch;
 
@@ -71,7 +72,7 @@ class TokenHelper {
       if (!refresh) {
         promise.setSuccess(false);
       } else {
-        const url = `https://auth.314ecorp.${this.env}/auth/realms/${this.tenant}/protocol/openid-connect/token`;
+        const url = `https://auth.314ecorp.${this.playerEnv}/auth/realms/${this.tenant}/protocol/openid-connect/token`;
         const params = `grant_type=refresh_token&refresh_token=${this.refreshToken}&client_id=jeeves`;
 
         this.refreshQueue.push(promise);
@@ -130,15 +131,21 @@ class TokenHelper {
       idToken,
       localTime,
       tenant,
-      env,
+      playerEnv,
       hasLiveAgentEnabled,
       isEhrLaunch,
+      serverUrl,
     } = message;
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.idToken = idToken;
     this.tenant = tenant;
-    this.env = env;
+    this.playerEnv = playerEnv;
+    if (serverUrl) {
+      this.serverUrl = serverUrl;
+    } else {
+      this.serverUrl = `https://${tenant}.jeeves.314ecorp.${playerEnv}`; // this is fallback to old server url
+    }
     this.hasLiveAgentEnabled = hasLiveAgentEnabled;
     this.isEhrLaunch = isEhrLaunch;
 
