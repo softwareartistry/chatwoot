@@ -176,12 +176,14 @@ export default {
           },
         });
 
-        const inviteLink = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&joinee=1`;
+        const cdn = tokenHelperInstance.serverUrl.includes('.okjeeves');
+
+        const inviteLink = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&joinee=1&cdn=${cdn}`;
         await this.sendMessage({
           content: `Call initiated. Join using: ${inviteLink}`,
         });
 
-        const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}`;
+        const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&cdn=${cdn}`;
 
         if (tokenHelperInstance.isEhrLaunch) {
           // eslint-disable-next-line no-console
