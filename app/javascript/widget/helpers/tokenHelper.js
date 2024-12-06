@@ -135,12 +135,14 @@ class TokenHelper {
       hasLiveAgentEnabled,
       isEhrLaunch,
       serverUrl,
+      useOkjeevesPlayer = true,
     } = message;
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     this.idToken = idToken;
     this.tenant = tenant;
     this.playerEnv = playerEnv;
+    this.useOkjeevesPlayer = useOkjeevesPlayer;
     if (serverUrl) {
       this.serverUrl = serverUrl;
     } else {

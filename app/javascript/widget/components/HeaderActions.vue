@@ -177,13 +177,15 @@ export default {
         });
 
         const cdn = tokenHelperInstance.serverUrl.includes('.okjeeves');
+        const tld = cdn && env === 'tech' ? 'tech' : 'app';
 
-        const inviteLink = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&joinee=1&cdn=${cdn}`;
+        const baseUrl = tokenHelperInstance.useOkjeevesPlayer ? `https://okjeeves.${env}` : `https://${tokenHelperInstance.tenant}.okjeeves.${tld}`;
+        const inviteLink = `${baseUrl}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&joinee=1&cdn=${cdn}`;
         await this.sendMessage({
           content: `Call initiated. Join using: ${inviteLink}`,
         });
 
-        const launchUrl = `https://okjeeves.${env}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&cdn=${cdn}`;
+        const launchUrl = `${baseUrl}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&cdn=${cdn}`;
 
         if (tokenHelperInstance.isEhrLaunch) {
           // eslint-disable-next-line no-console
