@@ -19,33 +19,23 @@ jobs:
         with:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.3.0
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: 'yarn'
 
-      - name: pnpm
-        run: pnpm install
+      - name: yarn
+        run: yarn install
 
       - name: Strip enterprise code
         run: |
           rm -rf enterprise
           rm -rf spec/enterprise
 
-      - name: setup env
-        run: |
-          cp .env.example .env
- 
       - name: Run asset compile
         run: bundle exec rake assets:precompile
         env:
-          RAILS_ENV: production
+          NODE_OPTIONS: --openssl-legacy-provider
 
       - name: Size Check
-        run: pnpm run size
-
-
+        run: yarn run size
