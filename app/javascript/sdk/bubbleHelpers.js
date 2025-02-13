@@ -17,16 +17,66 @@ const makeChatBubbleDraggable = target => {
   if (!target) {
     return;
   }
-  try {
-    const bubblePosition = JSON.parse(localStorage.getItem('chatwoot-bubble-position'));
-    if (bubblePosition) {
-      target.style.setProperty('left', bubblePosition.x + 'px');
-      target.style.setProperty('top', bubblePosition.y + 'px');
+
+  // Function to handle position updates
+  const updateBubblePosition = () => {
+    try {
+      const bubblePosition = JSON.parse(localStorage.getItem('chatwoot-bubble-position'));
+      if (bubblePosition) {
+        // Check if the stored position is in the old pixel format
+        if (Number.isInteger(bubblePosition.x) && bubblePosition.x > 100) {
+          // Convert pixels to percentage
+          const xPercent = (bubblePosition.x / window.innerWidth) * 100;
+          const yPercent = (bubblePosition.y / window.innerHeight) * 100;
+
+          // Calculate constrained percentages
+          const elementWidth = target.offsetWidth;
+          const elementHeight = target.offsetHeight;
+
+          const xPercentConstrained = Math.min(Math.max(0, xPercent), 100 - (elementWidth / window.innerWidth) * 100);
+          const yPercentConstrained = Math.min(Math.max(0, yPercent), 100 - (elementHeight / window.innerHeight) * 100);
+
+          // Save the new percentage-based position
+          const newPosition = {
+            x: xPercentConstrained,
+            y: yPercentConstrained,
+            isLeft: bubblePosition.isLeft
+          };
+
+          localStorage.setItem('chatwoot-bubble-position', JSON.stringify(newPosition));
+
+          // Apply the new percentage-based position
+          target.style.setProperty('left', `${xPercentConstrained}%`);
+          target.style.setProperty('top', `${yPercentConstrained}%`);
+        } else {
+          // Already in percentage format, apply directly
+          target.style.setProperty('left', `${bubblePosition.x}%`);
+          target.style.setProperty('top', `${bubblePosition.y}%`);
+        }
+      }
+    } catch (e) {
+      console.log(e);
     }
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(e);
-  }
+  };
+
+  // Initial position
+  updateBubblePosition();
+
+  // Add resize event listener
+  window.addEventListener('resize', () => {
+    let throttled = false;
+    const delay = 100;
+
+    if (throttled) {
+      return;
+    }
+    throttled = true;
+
+    setTimeout(() => {
+      throttled = false;
+      updateBubblePosition();
+    }, delay);
+  });
 
   target.addEventListener('dragenter', event => {
     event.preventDefault();
@@ -39,26 +89,43 @@ const makeChatBubbleDraggable = target => {
   });
 
   target.addEventListener('drag', event => {
-    if (event.clientX && event.clientY) {
-      const elementWidth = target.offsetWidth;
-      const elementHeight = target.offsetHeight;
+    // Prevent processing if coordinates are invalid (0,0 or null)
+    if (!event.clientX || !event.clientY || (event.clientX === 0 && event.clientY === 0)) {
+      return;
+    }
 
-      let newX = event.clientX;
-      let newY = event.clientY;
+    const elementWidth = target.offsetWidth;
+    const elementHeight = target.offsetHeight;
 
-      if (newX < 0) newX = 0;
-      if (newY < 0) newY = 0;
-      if (newX + elementWidth > window.innerWidth) newX = window.innerWidth - elementWidth;
-      if (newY + elementHeight > window.innerHeight) newY = window.innerHeight - elementHeight;
+    let newX = Math.min(Math.max(0, event.clientX), window.innerWidth);
+    let newY = Math.min(Math.max(0, event.clientY), window.innerHeight);
 
-      const newWidth = newX - target.clientWidth / 2;
-      const newHeight = newY - target.clientHeight / 2;
+    // Convert to percentages relative to viewport
+    const xPercent = (newX / window.innerWidth) * 100;
+    const yPercent = (newY / window.innerHeight) * 100;
 
-      const isLeft = window.screen.width / 2 > newWidth;
-      window.localStorage.setItem('chatwoot-bubble-position', JSON.stringify({ x: newWidth, y: newHeight, isLeft }));
+    // Constrain to viewport bounds
+    const xPercentConstrained = Math.min(Math.max(0, xPercent), 100 - (elementWidth / window.innerWidth) * 100);
+    const yPercentConstrained = Math.min(Math.max(0, yPercent), 100 - (elementHeight / window.innerHeight) * 100);
 
-      target.style.setProperty('left', newWidth + 'px');
-      target.style.setProperty('top', newHeight + 'px');
+    // Calculate final position in percentages
+    const newWidthPercent = xPercentConstrained - ((elementWidth / window.innerWidth) * 100) / 2;
+    const newHeightPercent = yPercentConstrained - ((elementHeight / window.innerHeight) * 100) / 2;
+
+    const isLeft = window.innerWidth / 2 > newX;
+
+    // Only update if the position is valid
+    if (newWidthPercent >= 0 && newHeightPercent >= 0) {
+      window.localStorage.setItem('chatwoot-bubble-position', JSON.stringify({
+        x: newWidthPercent,
+        y: newHeightPercent,
+        isLeft
+      }));
+
+      // Apply percentage-based positioning
+      target.style.setProperty('left', `${newWidthPercent}%`);
+      target.style.setProperty('top', `${newHeightPercent}%`);
+      target.style.setProperty('opacity', '1'); // Ensure visibility
 
       if (isLeft) {
         window.$chatwoot.position = 'left';
@@ -76,6 +143,12 @@ const makeChatBubbleDraggable = target => {
         });
       }
     }
+  });
+
+  // Add dragend event to ensure visibility is restored
+  target.addEventListener('dragend', () => {
+    target.style.setProperty('opacity', '1');
+    updateBubblePosition(); // Reapply saved position
   });
 };
 
