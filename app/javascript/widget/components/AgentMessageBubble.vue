@@ -6,7 +6,10 @@ import ChatOptions from 'shared/components/ChatOptions.vue';
 import ChatArticle from './template/Article.vue';
 import EmailInput from './template/EmailInput.vue';
 import CustomerSatisfaction from 'shared/components/CustomerSatisfaction.vue';
+import { useDarkMode } from 'widget/composables/useDarkMode';
 import IntegrationCard from './template/IntegrationCard.vue';
+import { IFrameHelper } from '../helpers/utils';
+import { tokenHelperInstance } from 'widget/helpers/tokenHelper';
 
 export default {
   name: 'AgentMessageBubble',
@@ -32,11 +35,13 @@ export default {
   setup() {
     const { formatMessage, getPlainText, truncateMessage, highlightContent } =
       useMessageFormatter();
+    const { getThemeClass } = useDarkMode();
     return {
       formatMessage,
       getPlainText,
       truncateMessage,
       highlightContent,
+      getThemeClass,
     };
   },
   computed: {
@@ -85,6 +90,15 @@ export default {
         messageId: this.messageId,
       });
     },
+    onLinkClick(e) {
+      if (tokenHelperInstance.isEhrLaunch && e.srcElement.href) {
+        e.preventDefault();
+        IFrameHelper.sendMessage({
+          event: 'jeevesLaunchInDefaultBrowser', // jeeves code
+          url: e.srcElement.href,
+        });
+      }
+    },
   },
 };
 </script>
@@ -95,11 +109,13 @@ export default {
       v-if="
         !isCards && !isOptions && !isForm && !isArticle && !isCards && !isCSAT
       "
-      class="chat-bubble agent bg-n-background dark:bg-n-solid-3 text-n-slate-12"
+      class="chat-bubble agent"
+      :class="getThemeClass('bg-white', 'dark:bg-slate-700 has-dark-mode')"
     >
       <div
         v-dompurify-html="formatMessage(message, false)"
-        class="message-content text-n-slate-12"
+        class="message-content text-slate-900 dark:text-slate-50"
+        @click="onLinkClick"
       />
       <EmailInput
         v-if="isTemplateEmail"
