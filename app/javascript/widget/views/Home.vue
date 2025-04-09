@@ -1,7 +1,6 @@
 <script>
 import TeamAvailability from 'widget/components/TeamAvailability.vue';
-import ArticleHero from 'widget/components/ArticleHero.vue';
-import ArticleCardSkeletonLoader from 'widget/components/ArticleCardSkeletonLoader.vue';
+import ArticleContainer from '../components/pageComponents/Home/Article/ArticleContainer.vue';
 
 import { mapGetters } from 'vuex';
 import { useDarkMode } from 'widget/composables/useDarkMode';
@@ -11,9 +10,8 @@ import configMixin from 'widget/mixins/configMixin';
 export default {
   name: 'Home',
   components: {
-    ArticleHero,
     TeamAvailability,
-    ArticleCardSkeletonLoader,
+    ArticleContainer,
   },
   mixins: [configMixin, routerMixin],
   setup() {
@@ -107,24 +105,6 @@ export default {
         @start-conversation="startConversation"
       />
     </div>
-    <div v-if="showArticles" class="w-full px-4 py-2">
-      <div class="w-full p-4 bg-white rounded-md shadow-sm dark:bg-slate-700">
-        <ArticleHero
-          v-if="
-            !articleUiFlags.isFetching &&
-            !articleUiFlags.isError &&
-            popularArticles.length
-          "
-          :articles="popularArticles"
-          @view="openArticleInArticleViewer"
-          @view-all="viewAllArticles"
-        />
-      </div>
-    </div>
-    <div v-if="articleUiFlags.isFetching" class="w-full px-4 py-2">
-      <div class="w-full p-4 bg-white rounded-md shadow-sm dark:bg-slate-700">
-        <ArticleCardSkeletonLoader />
-      </div>
-    </div>
+    <ArticleContainer />
   </div>
 </template>
