@@ -298,18 +298,7 @@ export default {
 </template>
 
 <style scoped lang="scss">
-@import 'widget/assets/scss/variables.scss';
-
 .actions {
-  button {
-    margin-left: $space-normal;
-  }
-
-  span {
-    color: $color-heading;
-    font-size: $font-size-large;
-  }
-
   .close-button {
     display: none;
   }
