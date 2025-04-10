@@ -10,6 +10,11 @@ const getSystemPreference = () =>
 const calculatePrefersDarkMode = (mode, systemPreference) =>
   isDarkModeAuto(mode) ? systemPreference : isDarkMode(mode);
 
+const calculateThemeClass = (mode, light, dark) => {
+  if (isDarkModeAuto(mode)) return `${light} ${dark}`;
+  return isDarkMode(mode) ? dark : light;
+};
+
 /**
  * Composable for handling dark mode.
  * @returns {Object} An object containing computed properties and methods for dark mode.
