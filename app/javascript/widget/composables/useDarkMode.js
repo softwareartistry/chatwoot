@@ -23,8 +23,12 @@ export function useDarkMode() {
     calculatePrefersDarkMode(darkMode.value, systemPreference.value)
   );
 
+  const getThemeClass = (light, dark) =>
+    calculateThemeClass(darkMode.value, light, dark);
+
   return {
     darkMode,
     prefersDarkMode,
+    getThemeClass,
   };
 }
