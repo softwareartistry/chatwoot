@@ -25,7 +25,7 @@ export default {
   },
   setup() {
     const { getThemeClass } = useDarkMode();
-    return {  getThemeClass };
+    return { getThemeClass };
   },
   data() {
     return {
@@ -60,11 +60,6 @@ export default {
     hasWidgetOptions() {
       return this.showPopoutButton || this.conversationStatus === 'open';
     },
-    hideReplyBox() {
-      const { allowMessagesAfterResolved } = window.chatwootWebChannel;
-      const { status } = this.conversationAttributes;
-      return !allowMessagesAfterResolved && status === 'resolved';
-    },
     canConnectToLiveAgent() {
       const allMessages = Object.values(this.allMessages);
       return allMessages.length > 0;
@@ -80,30 +75,22 @@ export default {
         );
         if (receivedMessages?.length) {
           const lastMessage = receivedMessages[receivedMessages.length - 1];
-          if (
-            !lastMessage ||
-            (lastMessage && lastMessage?.sender?.type !== 'user')
-          ) {
+          if (!lastMessage || lastMessage?.sender?.type !== 'user') {
             return false;
           }
 
           const agentId = lastMessage?.sender?.id;
-          if (lastMessage && agentId) {
-            const agent = this.availableAgents.find(
-              availableAgent => availableAgent.id === agentId
-            );
-            if (agent) {
-              return true;
-            }
-          }
+          const agent = this.availableAgents.find(
+            availableAgent => availableAgent.id === agentId
+          );
+          return !!agent;
         }
       }
-
       return false;
     },
   },
   methods: {
-    ...mapActions('conversation', ['sendMessage',]),
+    ...mapActions('conversation', ['sendMessage']),
     popoutWindow() {
       this.closeWindow();
       const {
@@ -132,6 +119,15 @@ export default {
       });
       this.$store.dispatch('conversation/resolveConversation');
     },
+    async connectToLiveAgent() {
+      IFrameHelper.sendMessage({
+        event: 'jeeves-connected-to-live-agent',
+        connected: true,
+      });
+      await this.sendMessage({
+        content: 'Connect me to a Live Agent',
+      });
+    },
     async initiateMeeting() {
       this.roomNameSuffix = `${Math.random() * 100}-${Date.now()}`;
       const env = document.location.origin.match(/\.(com|tech)$/)
@@ -147,39 +143,34 @@ export default {
             message.message_type === 1 && message.sender?.type === 'user'
         );
         const lastMessage = receivedMessages[receivedMessages.length - 1];
-        // eslint-disable-next-line no-console
-        console.log('lastMessage', lastMessage);
+        const agentName = lastMessage?.sender?.name || '';
 
-        const agentName = lastMessage.sender.name || '';
-        // eslint-disable-next-line no-console
-        console.log('agentName', agentName);
-
-        const tokens = await axios({
-          method: 'POST',
-          url: `${tokenHelperInstance.serverUrl}/api/v1/meeting/userAccessToken`,
-          headers: { Authorization: `Bearer ${token}` },
-          data: {
+        const tokens = await axios.post(
+          `${tokenHelperInstance.serverUrl}/api/v1/meeting/userAccessToken`,
+          {
             user_name: agentName,
             user_email: '',
           },
-        });
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-        const response = await axios({
-          method: 'post',
-          url: `${tokenHelperInstance.serverUrl}/api/v1/cacheValue`,
-          headers: { Authorization: `Bearer ${token}` },
-          data: {
+        const response = await axios.post(
+          `${tokenHelperInstance.serverUrl}/api/v1/cacheValue`,
+          {
             user_token: tokens.data.user_token,
             agent_token: tokens.data.agent_token,
             room: this.roomNameSuffix,
             token,
           },
-        });
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
         const cdn = tokenHelperInstance.serverUrl.includes('.okjeeves');
         const tld = cdn && env === 'tech' ? 'tech' : 'app';
+        const baseUrl = tokenHelperInstance.useOkjeevesPlayer
+          ? `https://okjeeves.${env}`
+          : `https://${tokenHelperInstance.tenant}.okjeeves.${tld}`;
 
-        const baseUrl = tokenHelperInstance.useOkjeevesPlayer ? `https://okjeeves.${env}` : `https://${tokenHelperInstance.tenant}.okjeeves.${tld}`;
         const inviteLink = `${baseUrl}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&joinee=1&cdn=${cdn}`;
         await this.sendMessage({
           content: `Call initiated. Join using: ${inviteLink}`,
@@ -188,10 +179,8 @@ export default {
         const launchUrl = `${baseUrl}/meeting?cacheKey=${response.data}&tenant=${tokenHelperInstance.tenant}&env=${env}&cdn=${cdn}`;
 
         if (tokenHelperInstance.isEhrLaunch) {
-          // eslint-disable-next-line no-console
-          console.log('launchUrl', launchUrl);
           IFrameHelper.sendMessage({
-            event: 'jeevesLaunchInDefaultBrowser', // jeeves code
+            event: 'jeevesLaunchInDefaultBrowser',
             url: launchUrl,
           });
         }
@@ -202,25 +191,15 @@ export default {
         anchorElm.click();
         anchorElm.remove();
       } catch (e) {
-        // console.log(e);
+        // handle error
       }
-    },
-    async connectToLiveAgent() {
-      IFrameHelper.sendMessage({
-        event: 'jeeves-connected-to-live-agent',
-        connected: true,
-      });
-      await this.sendMessage({
-        content: 'Connect me to a Live Agent',
-      });
     },
   },
 };
 </script>
 
-<!-- eslint-disable-next-line vue/no-root-v-if -->
 <template>
-  <div v-if="showHeaderActions" class="actions flex items-center">
+  <div v-if="showHeaderActions" class="actions flex items-center gap-3">
     <button
       v-if="hasLiveAgentEnabled"
       class="button transparent compact"
@@ -299,6 +278,15 @@ export default {
 
 <style scoped lang="scss">
 .actions {
+  button {
+    @apply ml-2;
+  }
+
+  span {
+    color: var(--color-heading);
+    font-size: 1.125rem; /* equivalent to text-lg if not using Tailwind here */
+  }
+
   .close-button {
     display: none;
   }

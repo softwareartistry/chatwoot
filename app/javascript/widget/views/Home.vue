@@ -105,6 +105,23 @@ export default {
         @start-conversation="startConversation"
       />
     </div>
-    <ArticleContainer />
+    <div v-if="showArticles" class="w-full px-4 py-2">
+      <div class="w-full p-4 bg-white rounded-md shadow-sm dark:bg-slate-700">
+        <ArticleContainer
+          v-if="!articleUiFlags.isFetching && !articleUiFlags.isError && popularArticles.length"
+          :articles="popularArticles"
+          @view-all="viewAllArticles"
+          @view="openArticleInArticleViewer"
+        />
+      </div>
+    </div>
+    <div v-if="articleUiFlags.isFetching" class="w-full px-4 py-2">
+      <div class="w-full p-4 bg-white rounded-md shadow-sm dark:bg-slate-700 space-y-4 animate-pulse">
+        <div class="h-5 bg-slate-300 dark:bg-slate-600 rounded w-1/3"></div>
+        <div class="h-4 bg-slate-200 dark:bg-slate-500 rounded w-full"></div>
+        <div class="h-4 bg-slate-200 dark:bg-slate-500 rounded w-5/6"></div>
+        <div class="h-4 bg-slate-200 dark:bg-slate-500 rounded w-2/3"></div>
+      </div>
+    </div>
   </div>
 </template>
