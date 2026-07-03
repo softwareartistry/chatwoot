@@ -30,6 +30,7 @@ const formState = reactive({
   ssoUrl: '',
   certificate: '',
   idpEntityId: '',
+  idpHint: '',
 });
 
 const validations = {
@@ -74,6 +75,7 @@ const loadSamlSettings = async () => {
       formState.certificate = settings.certificate || '';
       spEntityId.value = settings.sp_entity_id || '';
       formState.idpEntityId = settings.idp_entity_id || '';
+      formState.idpHint = settings.idp_hint || '';
       fingerprint.value = settings.fingerprint || '';
       isEnabled.value = formState.ssoUrl !== '';
     }
@@ -138,6 +140,7 @@ const handleSubmit = async () => {
     sso_url: formState.ssoUrl,
     certificate: formState.certificate,
     idp_entity_id: formState.idpEntityId,
+    idp_hint: formState.idpHint,
     role_mappings: {},
   };
 
@@ -150,6 +153,7 @@ const handleDisable = async () => {
   formState.certificate = '';
   spEntityId.value = '';
   formState.idpEntityId = '';
+  formState.idpHint = '';
   fingerprint.value = '';
 
   // the empty save will delete the SAML settings item
@@ -237,6 +241,18 @@ onMounted(() => {
           class="w-full"
           rows="8"
           :placeholder="t('SECURITY_SETTINGS.SAML.CERTIFICATE.PLACEHOLDER')"
+        />
+      </WithLabel>
+
+      <WithLabel
+        name="idpHint"
+        :label="t('SECURITY_SETTINGS.SAML.IDP_HINT.LABEL')"
+        :help-message="t('SECURITY_SETTINGS.SAML.IDP_HINT.HELP')"
+      >
+        <TextInput
+          v-model="formState.idpHint"
+          class="w-full"
+          :placeholder="t('SECURITY_SETTINGS.SAML.IDP_HINT.PLACEHOLDER')"
         />
       </WithLabel>
 

@@ -4,6 +4,7 @@
 #
 #  id            :bigint           not null, primary key
 #  certificate   :text
+#  idp_hint      :string
 #  role_mappings :json
 #  sso_url       :string
 #  created_at    :datetime         not null
@@ -55,10 +56,6 @@ class AccountSamlSettings < ApplicationRecord
 
   def sp_entity_id_needs_generation?
     sp_entity_id.blank?
-  end
-
-  def installation_name
-    GlobalConfigService.load('INSTALLATION_NAME', 'Chatwoot')
   end
 
   def update_account_users_provider

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, nextTick, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import { required, email } from '@vuelidate/validators';
+import { required, email as emailValidator } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
 import { useI18n } from 'vue-i18n';
 import { useAlert } from 'dashboard/composables';
@@ -19,13 +19,23 @@ const props = defineProps({
     type: String,
     default: 'web',
   },
+  accountId: {
+    type: String,
+    default: '',
+  },
+  email: {
+    type: String,
+    default: '',
+  },
 });
 
 const store = useStore();
 const { t } = useI18n();
 
+const formRef = ref(null);
+
 const credentials = ref({
-  email: '',
+  email: props.email || '',
 });
 
 const loginApi = ref({
@@ -47,7 +57,7 @@ const validations = {
   credentials: {
     email: {
       required,
-      email,
+      email: emailValidator,
     },
   },
 };
@@ -64,6 +74,14 @@ onMounted(async () => {
       ?.getAttribute('content') || '';
 
   await nextTick(handleAuthError);
+
+  // When account_id or email is supplied via the URL, initiate SSO right away
+  // and skip the manual work-email step.
+  if (!props.authError && (props.accountId || props.email)) {
+    loginApi.value.showLoading = true;
+    await nextTick();
+    formRef.value?.submit();
+  }
 });
 </script>
 
@@ -93,7 +111,12 @@ onMounted(async () => {
         'animate-wiggle': loginApi.hasErrored,
       }"
     >
-      <form class="space-y-5" method="POST" action="/api/v1/auth/saml_login">
+      <form
+        ref="formRef"
+        class="space-y-5"
+        method="POST"
+        action="/api/v1/auth/saml_login"
+      >
         <FormInput
           v-model="credentials.email"
           name="email"
@@ -111,6 +134,7 @@ onMounted(async () => {
           name="authenticity_token"
           :value="csrfToken"
         />
+        <input type="hidden" class="h-0" name="account_id" :value="accountId" />
         <input type="hidden" class="h-0" name="target" :value="target" />
         <NextButton
           lg

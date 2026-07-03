@@ -549,6 +549,11 @@
         "HELP": "Unique identifier for your identity provider (usually found in IdP configuration)",
         "PLACEHOLDER": "https://your-idp.com/saml"
       },
+      "IDP_HINT": {
+        "LABEL": "IdP Hint (optional)",
+        "HELP": "For Keycloak, the alias of an upstream identity provider. When set, the login skips Keycloak's provider picker and goes straight to it (sent as kc_idp_hint).",
+        "PLACEHOLDER": "e.g. penknife-microsoft-basic"
+      },
       "UPDATE_BUTTON": "Update SAML Settings",
       "API": {
         "SUCCESS": "SAML settings updated successfully",

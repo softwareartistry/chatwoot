@@ -20,6 +20,9 @@ class Saml::UpdateAccountUsersProviderJob < ApplicationJob
   # When resetting to 'email', only update users who don't have SAML enabled on other accounts
   # This prevents breaking SAML authentication for users who belong to multiple accounts
   def should_update_user_provider?(user, provider)
+    # Administrators are never switched to the SAML provider so they always retain
+    # password login (DeviseTokenAuth password auth only matches provider 'email').
+    return false if provider == 'saml' && user.account_users.administrator.exists?
     return !user_has_other_saml_accounts?(user) if provider == 'email'
 
     true

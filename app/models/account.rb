@@ -100,6 +100,8 @@ class Account < ApplicationRecord
   has_many :whatsapp_channels, dependent: :destroy_async, class_name: '::Channel::Whatsapp'
   has_many :working_hours, dependent: :destroy_async
 
+  has_one :saml_settings, dependent: :destroy_async, class_name: 'AccountSamlSettings'
+
   has_one_attached :contacts_export
 
   enum :locale, LANGUAGES_CONFIG.map { |key, val| [val[:iso_639_1_code], key] }.to_h, prefix: true
@@ -172,6 +174,10 @@ class Account < ApplicationRecord
   def reset_cache_keys
     super
     clear_unread_conversation_counts_cache
+  end
+
+  def saml_enabled?
+    saml_settings&.saml_enabled? || false
   end
 
   private

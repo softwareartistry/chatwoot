@@ -41,6 +41,7 @@ class Api::V1::Accounts::SamlSettingsController < Api::V1::Accounts::BaseControl
       :certificate,
       :idp_entity_id,
       :sp_entity_id,
+      :idp_hint,
       role_mappings: {}
     )
   end

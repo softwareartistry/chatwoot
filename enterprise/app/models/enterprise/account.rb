@@ -64,10 +64,6 @@ module Enterprise::Account
     interval_hours.hours
   end
 
-  def saml_enabled?
-    saml_settings&.saml_enabled? || false
-  end
-
   private
 
   def sync_assignment_features

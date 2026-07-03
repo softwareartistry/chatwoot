@@ -1,9 +1,12 @@
 class DeviseOverrides::SessionsController < DeviseTokenAuth::SessionsController
+  include SamlAuthenticationHelper
+
   MAX_SESSIONS = ENV.fetch('MAX_USER_SESSIONS', 25).to_i
 
   # Prevent session parameter from being passed
   # Unpermitted parameter: session
   wrap_parameters format: []
+  before_action :reject_saml_user_password_login, only: [:create]
   before_action :process_sso_auth_token, only: [:create]
 
   def new

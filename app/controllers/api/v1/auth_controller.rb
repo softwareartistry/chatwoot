@@ -13,15 +13,29 @@ class Api::V1::AuthController < Api::BaseController
     relay_state = params[:target] || 'web'
 
     saml_initiation_url = "/auth/saml?account_id=#{@account.id}&RelayState=#{relay_state}"
+    # Carry the per-account IdP hint so omniauth-saml maps it onto kc_idp_hint
+    # on the outgoing SAML request (see idp_sso_service_url_runtime_params).
+    idp_hint = @account.saml_settings&.idp_hint
+    saml_initiation_url += "&idp_hint=#{ERB::Util.url_encode(idp_hint)}" if idp_hint.present?
     redirect_to saml_initiation_url, status: :temporary_redirect
   end
 
   private
 
   def find_user_and_account
+    # Allow initiating SSO directly with an account_id (skips the work-email page)
+    return find_account_by_id if params[:account_id].present?
+
     return unless validate_email_presence
 
     find_saml_enabled_account
+  end
+
+  def find_account_by_id
+    account = Account.find_by(id: params[:account_id])
+    return render_saml_error unless account&.feature_enabled?('saml') && account.saml_settings&.saml_enabled?
+
+    @account = account
   end
 
   def validate_email_presence

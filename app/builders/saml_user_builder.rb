@@ -16,7 +16,7 @@ class SamlUserBuilder
   private
 
   def find_or_create_user
-    user = User.from_email(auth_attribute('email'))
+    user = User.from_email(saml_email)
 
     return create_user unless user
     return existing_user_for_account(user) if user_belongs_to_account?(user)
@@ -43,16 +43,18 @@ class SamlUserBuilder
 
   def convert_existing_user_to_saml(user)
     return if user.provider == 'saml'
+    # Administrators keep the email provider so password login always works for them.
+    return if user.account_users.administrator.exists?
 
     user.update!(provider: 'saml')
   end
 
   def create_user
     full_name = [auth_attribute('first_name'), auth_attribute('last_name')].compact.join(' ')
-    fallback_name = auth_attribute('name') || auth_attribute('email').split('@').first
+    fallback_name = auth_attribute('name') || saml_email.to_s.split('@').first
 
     User.create(
-      email: auth_attribute('email'),
+      email: saml_email,
       name: (full_name.presence || fallback_name),
       display_name: auth_attribute('first_name'),
       provider: 'saml',
@@ -102,6 +104,12 @@ class SamlUserBuilder
 
   def auth_attribute(key, fallback = nil)
     @auth_hash.dig('info', key) || fallback
+  end
+
+  # Falls back to the SAML NameID (mapped to uid) when the IdP does not send a
+  # dedicated email attribute. With emailAddress NameID format the uid is the email.
+  def saml_email
+    auth_attribute('email').presence || uid
   end
 
   def uid
