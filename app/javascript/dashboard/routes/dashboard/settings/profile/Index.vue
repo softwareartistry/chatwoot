@@ -82,7 +82,8 @@ export default {
             '/assets/images/dashboard/profile/hot-key-ctrl-enter-dark.svg',
         },
       ],
-      notificationPermissions: [...ROLES, ...CONVERSATION_PERMISSIONS],
+      // Jeeves: no role has this permission, so notification preferences stay hidden
+      notificationPermissions: ['notification_preferences_manage'],
       audioNotificationPermissions: [...ROLES, ...CONVERSATION_PERMISSIONS],
     };
   },
@@ -267,8 +268,7 @@ export default {
         <AudioNotifications />
       </FormSection>
     </Policy>
-    <!-- Jeeves: notification preferences hidden for all users -->
-    <Policy v-if="false" :permissions="notificationPermissions">
+    <Policy :permissions="notificationPermissions">
       <FormSection :title="$t('PROFILE_SETTINGS.FORM.NOTIFICATIONS.TITLE')">
         <NotificationPreferences />
       </FormSection>
