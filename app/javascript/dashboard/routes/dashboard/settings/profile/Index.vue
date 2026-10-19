@@ -267,7 +267,8 @@ export default {
         <AudioNotifications />
       </FormSection>
     </Policy>
-    <Policy :permissions="notificationPermissions">
+    <!-- Jeeves: notification preferences hidden for all users -->
+    <Policy v-if="false" :permissions="notificationPermissions">
       <FormSection :title="$t('PROFILE_SETTINGS.FORM.NOTIFICATIONS.TITLE')">
         <NotificationPreferences />
       </FormSection>

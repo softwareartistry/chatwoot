@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useStore, useMapGetter } from 'dashboard/composables/store';
 import { useAccount } from 'dashboard/composables/useAccount';
 import { useUISettings } from 'dashboard/composables/useUISettings';
+import { useAdmin } from 'dashboard/composables/useAdmin';
 
 import Draggable from 'vuedraggable';
 import Spinner from 'dashboard/components-next/spinner/Spinner.vue';
@@ -18,6 +19,7 @@ defineProps({
 const store = useStore();
 const { accountScopedUrl } = useAccount();
 const { uiSettings, updateUISettings } = useUISettings();
+const { isAdmin } = useAdmin();
 
 const dragging = ref(false);
 
@@ -70,7 +72,7 @@ onMounted(() => {
       <p class="flex flex-col items-center justify-center h-full">
         {{ $t('MACROS.LIST.404') }}
       </p>
-      <router-link :to="accountScopedUrl('settings/macros')">
+      <router-link v-if="isAdmin" :to="accountScopedUrl('settings/macros')">
         <woot-button variant="smooth" icon="add" size="tiny" class="mt-1">
           {{ $t('MACROS.HEADER_BTN_TXT') }}
         </woot-button>
