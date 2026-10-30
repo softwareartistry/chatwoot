@@ -92,7 +92,8 @@ class DashboardController < ActionController::Base
   end
 
   def allowed_login_methods
-    methods = ['email']
+    methods = []
+    methods << 'email' if GlobalConfigService.load('ENABLE_EMAIL_PASSWORD_LOGIN', 'true').to_s != 'false'
     methods << 'google_oauth' if GlobalConfigService.load('ENABLE_GOOGLE_OAUTH_LOGIN', 'true').to_s != 'false'
     methods << 'saml' if GlobalConfigService.load('ENABLE_SAML_SSO_LOGIN', 'true').to_s != 'false'
     methods
