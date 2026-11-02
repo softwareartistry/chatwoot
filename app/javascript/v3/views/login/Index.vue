@@ -101,10 +101,16 @@ export default {
       );
     },
     showSignupLink() {
-      return window.chatwootConfig.signupEnabled === 'true';
+      return (
+        window.chatwootConfig.signupEnabled === 'true' &&
+        this.showPasswordLogin
+      );
     },
     showSamlLogin() {
       return this.allowedLoginMethods.includes('saml');
+    },
+    showPasswordLogin() {
+      return this.allowedLoginMethods.includes('email');
     },
   },
   created() {
@@ -361,12 +367,16 @@ export default {
             </router-link>
           </div>
           <SimpleDivider
-            v-if="showGoogleOAuth || showSamlLogin"
+            v-if="(showGoogleOAuth || showSamlLogin) && showPasswordLogin"
             :label="$t('COMMON.OR')"
             class="uppercase"
           />
         </div>
-        <form class="space-y-5" @submit.prevent="submitFormLogin">
+        <form
+          v-if="showPasswordLogin"
+          class="space-y-5"
+          @submit.prevent="submitFormLogin"
+        >
           <FormInput
             v-model="credentials.email"
             name="email_address"

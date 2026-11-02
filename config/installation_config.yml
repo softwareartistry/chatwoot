@@ -495,6 +495,15 @@
   type: boolean
 ## ------ End of Configs added for Google OAuth ------ ##
 
+## ------ Config to enable/disable email/password login ------ ##
+- name: ENABLE_EMAIL_PASSWORD_LOGIN
+  display_title: 'Enable email/password login'
+  value: true
+  locked: false
+  description: 'Show email/password as a login option. Disable this once SSO is fully rolled out so users can only sign in via SSO. The /auth/sign_in API is blocked as well when this is off.'
+  type: boolean
+## ------ End of Config to enable/disable email/password login ------ ##
+
 ## ------ Configs added for SAML SSO ------ ##
 - name: ENABLE_SAML_SSO_LOGIN
   display_title: 'Enable SAML SSO login'
