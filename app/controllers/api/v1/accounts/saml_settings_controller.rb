@@ -28,6 +28,14 @@ class Api::V1::Accounts::SamlSettingsController < Api::V1::Accounts::BaseControl
     head :no_content
   end
 
+  def refresh
+    if @saml_settings.refresh_metadata
+      render :show
+    else
+      render json: { errors: @saml_settings.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_saml_settings
@@ -42,6 +50,7 @@ class Api::V1::Accounts::SamlSettingsController < Api::V1::Accounts::BaseControl
       :idp_entity_id,
       :sp_entity_id,
       :idp_hint,
+      :metadata_url,
       role_mappings: {}
     )
   end

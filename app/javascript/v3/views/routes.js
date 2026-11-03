@@ -7,6 +7,7 @@ import ResetPassword from './auth/reset/password/Index.vue';
 import Confirmation from './auth/confirmation/Index.vue';
 import VerifyEmail from './auth/verify-email/Index.vue';
 import PasswordEdit from './auth/password/Edit.vue';
+import { getShopifyBillingRedirect } from '../helpers/AuthHelper';
 
 export default [
   {
@@ -20,6 +21,8 @@ export default [
       ssoAccountId: route.query.sso_account_id,
       ssoConversationId: route.query.sso_conversation_id,
       authError: route.query.error,
+      redirectUrl:
+        route.query.redirect_url || getShopifyBillingRedirect(route.query),
     }),
   },
   {
@@ -32,6 +35,8 @@ export default [
       target: route.query.target,
       accountId: route.query.account_id,
       email: route.query.email,
+      ssoAccountId: route.query.sso_account_id,
+      redirectUrl: route.query.redirect_url,
     }),
   },
   {
@@ -39,6 +44,9 @@ export default [
     name: 'auth_signup',
     component: Signup,
     meta: { requireSignupEnabled: true },
+    props: route => ({
+      shopifyPendingInstall: route.query.shopify_pending_install,
+    }),
   },
   {
     path: frontendURL('auth/confirmation'),
@@ -48,6 +56,7 @@ export default [
     props: route => ({
       config: route.query.config,
       confirmationToken: route.query.confirmation_token,
+      ssoAccountId: route.query.sso_account_id,
       redirectUrl: route.query.route_url,
     }),
   },
@@ -58,6 +67,7 @@ export default [
     meta: { ignoreSession: true },
     props: () => ({
       email: window.history.state?.email || '',
+      redirectUrl: window.history.state?.redirectUrl || '',
     }),
   },
   {
@@ -68,6 +78,7 @@ export default [
     props: route => ({
       config: route.query.config,
       resetPasswordToken: route.query.reset_password_token,
+      ssoAccountId: route.query.sso_account_id,
       redirectUrl: route.query.route_url,
     }),
   },
@@ -75,5 +86,9 @@ export default [
     path: frontendURL('auth/reset/password'),
     name: 'auth_reset_password',
     component: ResetPassword,
+    props: route => ({
+      redirectUrl: route.query.redirect_url,
+      ssoAccountId: route.query.sso_account_id,
+    }),
   },
 ];

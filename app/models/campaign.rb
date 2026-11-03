@@ -6,14 +6,17 @@
 #  audience                           :jsonb
 #  campaign_status                    :integer          default("active"), not null
 #  campaign_type                      :integer          default("ongoing"), not null
+#  completed_at                       :datetime
 #  description                        :text
 #  enabled                            :boolean          default(TRUE)
 #  message                            :text             not null
 #  scheduled_at                       :datetime
+#  started_at                         :datetime
 #  template_params                    :jsonb
 #  title                              :string           not null
 #  trigger_only_during_business_hours :boolean          default(FALSE)
 #  trigger_rules                      :jsonb
+#  whatsapp_cursor                    :bigint
 #  created_at                         :datetime         not null
 #  updated_at                         :datetime         not null
 #  account_id                         :bigint           not null
@@ -52,7 +55,9 @@ class Campaign < ApplicationRecord
   has_many :conversations, dependent: :nullify, autosave: true
 
   before_validation :ensure_correct_campaign_attributes
+  before_update :set_completed_at, if: :marking_completed?
   after_commit :set_display_id, unless: :display_id?
+  after_destroy_commit :invalidate_filtered_unread_count_filters
 
   def trigger!
     return unless one_off?
@@ -65,16 +70,24 @@ class Campaign < ApplicationRecord
   private
 
   def feature_enabled?
-    inbox.inbox_type != 'Whatsapp' || account.feature_enabled?(:whatsapp_campaign)
+    account.feature_enabled?(:campaigns)
   end
 
   def mark_processing!
     # Multiple scheduler jobs can pick the same active campaign; lock before flipping status to avoid duplicate sends.
     with_lock do
-      next if completed? || processing?
+      next if completed? || processing? || scheduled_at > Time.current
 
-      processing!
+      update!(campaign_status: :processing, started_at: Time.current)
     end
+  end
+
+  def marking_completed?
+    will_save_change_to_campaign_status? && completed?
+  end
+
+  def set_completed_at
+    self.completed_at ||= Time.current
   end
 
   def execute_campaign
@@ -86,6 +99,15 @@ class Campaign < ApplicationRecord
     when 'Whatsapp'
       Whatsapp::OneoffCampaignService.new(campaign: self).perform
     end
+  end
+
+  def invalidate_filtered_unread_count_filters
+    filters_changed = ::Conversations::UnreadCounts::FilteredCountInvalidator.new(account).conversation_changed!
+    dispatch_account_cache_invalidated if filters_changed
+  end
+
+  def dispatch_account_cache_invalidated
+    Rails.configuration.dispatcher.dispatch(ACCOUNT_CACHE_INVALIDATED, Time.zone.now, account: account, cache_keys: account.cache_keys)
   end
 
   def set_display_id
@@ -143,3 +165,4 @@ class Campaign < ApplicationRecord
     "NEW.display_id := nextval('camp_dpid_seq_' || NEW.account_id);"
   end
 end
+Campaign.include_mod_with('Campaign')
