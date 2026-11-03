@@ -113,9 +113,9 @@ export default {
     },
     showSignupLink() {
       return (
-        this.showPasswordLogin &&
-        (window.chatwootConfig.signupEnabled === 'true' ||
-          Boolean(this.signupRoute.query?.shopify_pending_install))
+        (window.chatwootConfig.signupEnabled === 'true' &&
+          this.showPasswordLogin) ||
+        Boolean(this.signupRoute.query?.shopify_pending_install)
       );
     },
     signupRoute() {

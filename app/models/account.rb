@@ -198,10 +198,6 @@ class Account < ApplicationRecord
     clear_unread_conversation_counts_cache
   end
 
-  def saml_enabled?
-    saml_settings&.saml_enabled? || false
-  end
-
   private
 
   def notify_creation
