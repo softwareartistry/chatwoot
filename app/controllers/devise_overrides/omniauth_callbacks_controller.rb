@@ -42,7 +42,10 @@ class DeviseOverrides::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCa
 
     @resource = SamlUserBuilder.new(auth_hash, account_id).perform
 
-    return sign_in_saml_user(relay_state) if @resource.persisted?
+    if @resource.persisted?
+      mark_account_as_active(account_id)
+      return sign_in_saml_user(relay_state)
+    end
 
     handle_saml_auth_error(relay_state, 'saml-authentication-failed')
   rescue SamlUserBuilder::AuthenticationFailed
@@ -51,6 +54,13 @@ class DeviseOverrides::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCa
 
   def extract_saml_account_id
     params[:account_id] || request.env['omniauth.params']&.dig('account_id')
+  end
+
+  # Without this, the post-login redirect falls back to whichever account the
+  # user was last active in (see User#active_account_user), ignoring the
+  # account_id the SSO link explicitly requested.
+  def mark_account_as_active(account_id)
+    @resource.account_users.find_by(account_id: account_id)&.update(active_at: Time.now.utc)
   end
 
   def saml_relay_state
