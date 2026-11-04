@@ -112,7 +112,10 @@ class AccountSamlSettings < ApplicationRecord
   end
 
   def set_sp_entity_id
-    base_url = GlobalConfigService.load('FRONTEND_URL', 'http://localhost:3000')
+    # ENV, not GlobalConfigService: see the comment in config/initializers/omniauth_saml.rb —
+    # this must always track the live FRONTEND_URL, since Keycloak validates the SP entity ID
+    # against the client's registered one.
+    base_url = ENV.fetch('FRONTEND_URL', 'http://localhost:3000')
     self.sp_entity_id = "#{base_url}/saml/sp/#{account_id}"
   end
 
