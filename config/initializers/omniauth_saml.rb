@@ -31,7 +31,12 @@ SAML_SETUP_PROC = proc do |env|
       # incoming `idp_hint` request param is mapped onto the outgoing `kc_idp_hint`
       # SAML URL param, so omniauth-saml/ruby-saml builds (and would sign) it correctly.
       env['omniauth.strategy'].options[:idp_sso_service_url_runtime_params] = { RelayState: :RelayState, idp_hint: :kc_idp_hint }
-      base_url = GlobalConfigService.load('FRONTEND_URL', 'http://localhost:3000')
+      # Deliberately ENV, not GlobalConfigService: that helper caches whatever
+      # value it first resolves into the DB forever (see
+      # lib/global_config_service.rb), which is wrong for the SAML ACS URL —
+      # it must always track the live FRONTEND_URL, since Keycloak validates
+      # this exact redirect URI against the client's registered one.
+      base_url = ENV.fetch('FRONTEND_URL', 'http://localhost:3000')
       env['omniauth.strategy'].options[:assertion_consumer_service_url] = "#{base_url}/omniauth/saml/callback?account_id=#{account_id}"
       env['omniauth.strategy'].options[:sp_entity_id] = settings.sp_entity_id
       env['omniauth.strategy'].options[:idp_entity_id] = settings.idp_entity_id

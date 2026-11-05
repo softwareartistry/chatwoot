@@ -1,0 +1,47 @@
+name: "Tag Based Integration Deployment"
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_release:
+        type: boolean
+        description: new release
+        required: false
+        default: false
+      db_migration:
+        type: boolean
+        description: db migration
+        required: false
+        default: false
+
+env:
+  NAMESPACE: chatwoot
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: [self-hosted]
+    steps:
+      - name: Run deployment flow
+        run: |
+          image_tag="$(echo '${{ github.ref_name }}' | tr '/' '-')"
+          image="registry.314ecorp.tech/chatwoot:$image_tag"
+
+          if [ "${{ inputs.new_release }}" == "true" ] && [ "${{ inputs.db_migration }}" == "true" ]; then
+            # worker runs 2 replicas; set its image only after migration, so no
+            # replica can pick up new code before the schema is ready.
+            kubectl set image deployment.apps/chatwoot-web -n "$NAMESPACE" chatwoot-web=$image
+            kubectl delete pods -l app=chatwoot-web -n "$NAMESPACE"
+            POD_NAME=$(kubectl get pod -l app=chatwoot-web --field-selector=status.phase==Running -o jsonpath="{.items[0].metadata.name}" -n "$NAMESPACE")
+            kubectl exec "$POD_NAME" -n "$NAMESPACE" -- /bin/bash -c 'RAILS_ENV=production bundle exec rails db:chatwoot_prepare'
+            kubectl set image deployment.apps/chatwoot-worker -n "$NAMESPACE" chatwoot-worker=$image
+          elif [ "${{ inputs.new_release }}" == "true" ]; then
+            kubectl set image deployment.apps/chatwoot-web -n "$NAMESPACE" chatwoot-web=$image
+            kubectl set image deployment.apps/chatwoot-worker -n "$NAMESPACE" chatwoot-worker=$image
+          elif [ "${{ inputs.db_migration }}" == "true" ]; then
+            POD_NAME=$(kubectl get pod -l app=chatwoot-web --field-selector=status.phase==Running -o jsonpath="{.items[0].metadata.name}" -n "$NAMESPACE")
+            kubectl exec "$POD_NAME" -n "$NAMESPACE" -- /bin/bash -c 'RAILS_ENV=production bundle exec rails db:chatwoot_prepare'
+          else
+            kubectl rollout restart deployment chatwoot-worker -n "$NAMESPACE"
+            kubectl rollout restart deployment chatwoot-web -n "$NAMESPACE"
+          fi
