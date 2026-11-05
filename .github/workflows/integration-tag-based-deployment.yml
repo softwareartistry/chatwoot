@@ -5,7 +5,7 @@ on:
     inputs:
       tenants:
         type: string
-        description: "Comma-separated k8s namespace names (e.g., chatwoot,chatwoot-staging)"
+        description: "Comma-separated k8s namespace names for the chatwoot-web/chatwoot-worker deployments (e.g., chatwoot,chatwoot-staging)"
         required: true
       new_release:
         type: boolean
@@ -39,22 +39,22 @@ jobs:
 
             if [ "${{ inputs.new_release }}" == "true" ]; then
               echo "Deploying image $image_tag for $tenant"
-              kubectl set image deployment.apps/chatwoot -n "$tenant" chatwoot=registry.314ecorp.tech/chatwoot:$image_tag
+              kubectl set image deployment.apps/chatwoot-web -n "$tenant" chatwoot-web=registry.314ecorp.tech/chatwoot:$image_tag
               kubectl set image deployment.apps/chatwoot-worker -n "$tenant" chatwoot-worker=registry.314ecorp.tech/chatwoot:$image_tag
             fi
 
             if [ "${{ inputs.db_migration }}" == "true" ]; then
               echo "Deleting chatwoot pods to ensure fresh code for $tenant"
-              kubectl delete pods -l app=chatwoot -n "$tenant"
+              kubectl delete pods -l app=chatwoot-web -n "$tenant"
               kubectl delete pods -l app=chatwoot-worker -n "$tenant"
 
               echo "Waiting for chatwoot pod to be ready in $tenant for DB migration"
-              POD_NAME=$(kubectl get pod -l app=chatwoot --field-selector=status.phase==Running -o jsonpath="{.items[0].metadata.name}" -n "$tenant")
+              POD_NAME=$(kubectl get pod -l app=chatwoot-web --field-selector=status.phase==Running -o jsonpath="{.items[0].metadata.name}" -n "$tenant")
               echo "Running DB migration on $POD_NAME"
-              kubectl exec "$POD_NAME" -n "$tenant" -- /bin/bash -c 'bundle exec rails db:migrate'
+              kubectl exec "$POD_NAME" -n "$tenant" -- /bin/bash -c 'RAILS_ENV=production bundle exec rails db:chatwoot_prepare'
             else
               echo "Restarting deployments for $tenant"
               kubectl rollout restart deployment chatwoot-worker -n "$tenant"
-              kubectl rollout restart deployment chatwoot -n "$tenant"
+              kubectl rollout restart deployment chatwoot-web -n "$tenant"
             fi
           done
