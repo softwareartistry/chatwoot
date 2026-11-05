@@ -1,0 +1,60 @@
+name: "Tag Based Integration Deployment"
+
+on:
+  workflow_dispatch:
+    inputs:
+      tenants:
+        type: string
+        description: "Comma-separated k8s namespace names (e.g., chatwoot,chatwoot-staging)"
+        required: true
+      new_release:
+        type: boolean
+        description: new release
+        required: false
+        default: false
+      db_migration:
+        type: boolean
+        description: db migration
+        required: false
+        default: false
+
+jobs:
+  deploy:
+    name: "Deploy"
+    # Assumes a self-hosted runner with kubectl pre-configured for the cluster is
+    # already registered for this repo (same approach as jeeves-app's equivalent
+    # workflow) — adjust this label if this repo's runner is registered under a
+    # different one; could not verify via API (needs org-admin scope).
+    runs-on: [self-hosted]
+    steps:
+      - name: Run deployment flow for each tenant
+        run: |
+          IFS=',' read -ra tenants <<< "${{ inputs.tenants }}"
+
+          # Match publish_foss_docker.yml's tag sanitization — Docker tags can't contain "/".
+          image_tag="$(echo '${{ github.ref_name }}' | tr '/' '-')"
+
+          for tenant in "${tenants[@]}"; do
+            echo "Processing tenant: $tenant"
+
+            if [ "${{ inputs.new_release }}" == "true" ]; then
+              echo "Deploying image $image_tag for $tenant"
+              kubectl set image deployment.apps/chatwoot -n "$tenant" chatwoot=registry.314ecorp.tech/chatwoot:$image_tag
+              kubectl set image deployment.apps/chatwoot-worker -n "$tenant" chatwoot-worker=registry.314ecorp.tech/chatwoot:$image_tag
+            fi
+
+            if [ "${{ inputs.db_migration }}" == "true" ]; then
+              echo "Deleting chatwoot pods to ensure fresh code for $tenant"
+              kubectl delete pods -l app=chatwoot -n "$tenant"
+              kubectl delete pods -l app=chatwoot-worker -n "$tenant"
+
+              echo "Waiting for chatwoot pod to be ready in $tenant for DB migration"
+              POD_NAME=$(kubectl get pod -l app=chatwoot --field-selector=status.phase==Running -o jsonpath="{.items[0].metadata.name}" -n "$tenant")
+              echo "Running DB migration on $POD_NAME"
+              kubectl exec "$POD_NAME" -n "$tenant" -- /bin/bash -c 'bundle exec rails db:migrate'
+            else
+              echo "Restarting deployments for $tenant"
+              kubectl rollout restart deployment chatwoot-worker -n "$tenant"
+              kubectl rollout restart deployment chatwoot -n "$tenant"
+            fi
+          done
