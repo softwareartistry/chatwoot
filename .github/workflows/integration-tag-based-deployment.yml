@@ -30,21 +30,34 @@ jobs:
         run: |
           # Match publish_foss_docker.yml's tag sanitization — Docker tags can't contain "/".
           image_tag="$(echo '${{ github.ref_name }}' | tr '/' '-')"
+          image="registry.314ecorp.tech/chatwoot:$image_tag"
 
-          if [ "${{ inputs.new_release }}" == "true" ]; then
-            echo "Deploying image $image_tag"
-            kubectl set image deployment.apps/chatwoot-web -n "$NAMESPACE" chatwoot-web=registry.314ecorp.tech/chatwoot:$image_tag
-            kubectl set image deployment.apps/chatwoot-worker -n "$NAMESPACE" chatwoot-worker=registry.314ecorp.tech/chatwoot:$image_tag
-          fi
+          if [ "${{ inputs.new_release }}" == "true" ] && [ "${{ inputs.db_migration }}" == "true" ]; then
+            # chatwoot-worker runs 2 replicas. Setting its image here would let
+            # k8s start rolling one replica onto the new code immediately — before
+            # migrations below have run — so that pod could process Sidekiq jobs
+            # against the old schema. Update + migrate on web (1 replica) first;
+            # only touch worker's image once the schema is confirmed ready.
+            echo "Deploying image $image_tag to chatwoot-web"
+            kubectl set image deployment.apps/chatwoot-web -n "$NAMESPACE" chatwoot-web=$image
 
-          if [ "${{ inputs.db_migration }}" == "true" ]; then
-            echo "Deleting chatwoot pods to ensure fresh code"
+            echo "Deleting chatwoot-web pod to ensure fresh code"
             kubectl delete pods -l app=chatwoot-web -n "$NAMESPACE"
-            kubectl delete pods -l app=chatwoot-worker -n "$NAMESPACE"
 
-            echo "Waiting for chatwoot pod to be ready for DB migration"
+            echo "Waiting for chatwoot-web pod to be ready for DB migration"
             POD_NAME=$(kubectl get pod -l app=chatwoot-web --field-selector=status.phase==Running -o jsonpath="{.items[0].metadata.name}" -n "$NAMESPACE")
             echo "Running DB migration on $POD_NAME"
+            kubectl exec "$POD_NAME" -n "$NAMESPACE" -- /bin/bash -c 'RAILS_ENV=production bundle exec rails db:chatwoot_prepare'
+
+            echo "Schema ready — deploying image $image_tag to chatwoot-worker"
+            kubectl set image deployment.apps/chatwoot-worker -n "$NAMESPACE" chatwoot-worker=$image
+          elif [ "${{ inputs.new_release }}" == "true" ]; then
+            echo "Deploying image $image_tag (no migration requested)"
+            kubectl set image deployment.apps/chatwoot-web -n "$NAMESPACE" chatwoot-web=$image
+            kubectl set image deployment.apps/chatwoot-worker -n "$NAMESPACE" chatwoot-worker=$image
+          elif [ "${{ inputs.db_migration }}" == "true" ]; then
+            echo "Running DB migration against the current image (no new release)"
+            POD_NAME=$(kubectl get pod -l app=chatwoot-web --field-selector=status.phase==Running -o jsonpath="{.items[0].metadata.name}" -n "$NAMESPACE")
             kubectl exec "$POD_NAME" -n "$NAMESPACE" -- /bin/bash -c 'RAILS_ENV=production bundle exec rails db:chatwoot_prepare'
           else
             echo "Restarting deployments"
