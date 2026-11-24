@@ -20,8 +20,12 @@ env:
 jobs:
   deploy:
     name: "Deploy"
-    runs-on: [self-hosted]
+    # same runner as jeeves-app's integration deploy; a bare [self-hosted] could land on the prod-deploy runner.
+    runs-on: [self-hosted, python-3.14]
     steps:
+      - name: Show target cluster
+        run: kubectl config current-context
+
       - name: Run deployment flow
         run: |
           image_tag="$(echo '${{ github.ref_name }}' | tr '/' '-')"
