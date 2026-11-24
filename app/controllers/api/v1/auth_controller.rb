@@ -103,7 +103,8 @@ class Api::V1::AuthController < Api::BaseController
   end
 
   def sso_login_page_url(error: nil, redirect_url: nil)
-    frontend_url = GlobalConfigService.load('FRONTEND_URL', 'http://localhost:3000')
+    # ENV, not GlobalConfigService: see the comment in config/initializers/omniauth_saml.rb.
+    frontend_url = ENV.fetch('FRONTEND_URL', 'http://localhost:3000')
     params = { error: error, redirect_url: redirect_url, sso_account_id: request.params[:sso_account_id] }.compact
 
     query = params.to_query
