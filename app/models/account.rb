@@ -88,6 +88,7 @@ class Account < ApplicationRecord
   has_many :facebook_pages, dependent: :destroy_async, class_name: '::Channel::FacebookPage'
   has_many :instagram_channels, dependent: :destroy_async, class_name: '::Channel::Instagram'
   has_many :tiktok_channels, dependent: :destroy_async, class_name: '::Channel::Tiktok'
+  has_one :saml_settings, dependent: :destroy_async, class_name: 'AccountSamlSettings'
   has_one :shopify_custom_app, dependent: :destroy, class_name: 'Shopify::CustomApp'
   has_many :hooks, dependent: :destroy_async, class_name: 'Integrations::Hook'
   has_many :inboxes, dependent: :destroy_async
@@ -109,8 +110,6 @@ class Account < ApplicationRecord
   has_many :webhooks, dependent: :destroy_async
   has_many :whatsapp_channels, dependent: :destroy_async, class_name: '::Channel::Whatsapp'
   has_many :working_hours, dependent: :destroy_async
-
-  has_one :saml_settings, dependent: :destroy_async, class_name: 'AccountSamlSettings'
 
   has_one_attached :contacts_export
 
